@@ -52,7 +52,6 @@ export async function fetchTaskInfo(room_id) {
   console.log("room_id",room_id)
   try {
      let url = `${TASK_SERVICE_API_URL}/task-assignments`;
-console.log("url",url)
     // If not "all", append task_status filter
     if (room_id) {
       url += `?room_id=${room_id}`;
@@ -66,13 +65,17 @@ console.log("url",url)
     throw error;
   }
 }
-export async function fetchAllTasks(task_type) {
+export async function fetchAllTasks({task_type,assigned_to}) {
+  console.log("assigned_to::123",assigned_to)
   try {
      let url = `${TASK_SERVICE_API_URL}/task-items`;
      console.log("url",url)
     // If not "all", append task_status filter
     if (task_type) {
       url += `?task_type=${task_type}`;
+    } 
+     if (assigned_to) {
+      url += `?assigned_to=${assigned_to}`;
     } 
     console.log("url",url,"status: ",task_type)
    const response = await axios.get(url);
@@ -123,9 +126,9 @@ export async function fetchTotalPendingTaskRooms() {
   }
 }
 
-export async function updateTaskStatus(taskId, status) {
+export async function updateTaskStatus(taskId, status, task_type) {
   try {
-    const response = await axios.patch(`${TASK_SERVICE_API_URL}/task-assignments/${taskId}/status`, { status });
+    const response = await axios.patch(`${TASK_SERVICE_API_URL}/task-assignments/${taskId}/status`, { status, task_type });
     console.log("taskstatus url:: ",`${TASK_SERVICE_API_URL}/task-assignments/${taskId}/status`,status)
     // http://localhost:3004/api/task-assignments/2/status
     return response.data;

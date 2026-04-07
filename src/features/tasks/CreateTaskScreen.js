@@ -7,7 +7,7 @@ export default function CreateTaskScreen({ navigation }) {
     const { user } = useAuth();
     const userId = user?.user_id;
     const userEmail = user?.user_email;
-    const taskType = user?.user_role_name == "HousekeepingManager" ? "housekeeping" : "maintance"
+    const taskType = user?.user_role_name == "HousekeepingManager" ? "housekeeping" : "maintenance"
     const [task_name, setTaskName] = useState("");
     const [task_description, setTaskDescription] = useState("");
     const [task_notes, setTaskNotes] = useState("");

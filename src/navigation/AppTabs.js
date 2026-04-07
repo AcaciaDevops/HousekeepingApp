@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import DashboardScreen from "../features/dashboard/DashboardScreen";
 import RoomsStack from "./RoomsStack";
 import TasksStack from "./TasksStack";
-import StaffScreen from "../features/staff/StaffScreen";
+import StaffStack from "./StaffStack";
 import ProfileScreen from "../features/profile/ProfileScreen";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -29,7 +29,7 @@ export default function AppTabs({ user }) {
         />
       )}
 
-      {["HousekeepingManager", "HousekeepingStaff", "MaintenanceManager"].includes(user.user_role_name) && (
+      {["HousekeepingManager", "HousekeepingStaff", "MaintenanceManager","MaintenanceStaff"].includes(user.user_role_name) && (
         <Tab.Screen
           name="Tasks"
           component={TasksStack}
@@ -37,10 +37,10 @@ export default function AppTabs({ user }) {
         />
       )}
 
-      {["HousekeepingManager"].includes(user.user_role_name) && (
+      {["HousekeepingManager","MaintenanceManager"].includes(user.user_role_name) && (
         <Tab.Screen
           name="Staff"
-          component={StaffScreen}
+          component={StaffStack}
           options={{ tabBarIcon: ({ color, size }) => <MaterialIcons name="group" size={size} color={color} /> }}
         />
       )}

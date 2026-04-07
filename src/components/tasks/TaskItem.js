@@ -36,7 +36,8 @@ console.log("userRole::",userRole)
 
     setUpdatingStatus(true);
     try {
-      const updatedTask = await updateTaskStatus(task.id, newStatus);
+      console.log("task::details::1023",task)
+      const updatedTask = await updateTaskStatus(task.id, newStatus, task.task_type);
       {console.log("updated task::12",updatedTask)}
       setStatus(newStatus);
       if (onStatusUpdated) onStatusUpdated(newStatus);

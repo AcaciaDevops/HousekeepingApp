@@ -28,7 +28,10 @@
     ],
     "extra": {
       "apiUrl": "https://api.yourhotelpms.com",
-      "environment": "production"
+      "environment": "production",
+      "eas": {
+        "projectId": "d5faeb67-be4a-435a-9283-12c19ffc2125"
+      }
     },
     "ios": {
       "supportsTablet": true,

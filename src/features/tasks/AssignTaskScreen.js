@@ -17,6 +17,7 @@ export default function AssignTaskScreen({ navigation }) {
   const { user } = useAuth();
   const userId = user?.user_id;
   const userEmail = user?.user_email;
+  const userRole = user?.user_role_name;
 
   const [tasks, setTasks] = useState([]);
   const [rooms, setRooms] = useState([]);
@@ -40,10 +41,12 @@ export default function AssignTaskScreen({ navigation }) {
   }, []);
 
   async function loadData() {
-    const t = await fetchAllTasks();
+     const task_type = userRole == "MaintenanceManager" ? "maintenance": "housekeeping";
+    const t = await fetchAllTasks(task_type);
     const r = await fetchRooms();
     console.log("rooms::in assign",r)
-    const s = await fetchUserbyRole("HousekeepingStaff");
+    const roleName = userRole == "MaintenanceManager" ? "MaintenanceStaff" : "HousekeepingStaff";
+    const s = await fetchUserbyRole(roleName);
 
     setTasks(t.items || []);
     setRooms(r || []);

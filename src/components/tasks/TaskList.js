@@ -17,6 +17,7 @@ export default function TaskList({ route }) {
     setLoading(true);
     try {
       const res = await fetchTasks(currentTabStatus, user);
+      console.log("res::task::",res)
       setTasks(res.data || []);
       setTotalTask(res.total);
     } finally {

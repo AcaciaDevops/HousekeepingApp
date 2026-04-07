@@ -44,6 +44,7 @@ export default function AddTaskComponent({
   }, [visible]);
 
   async function loadData() {
+    console.log("user info::",user)
     const t = await fetchAllTasks();
     const s = await fetchUserbyRole(role_name);
     console.log("all task fetched in add task screen : ", t)
