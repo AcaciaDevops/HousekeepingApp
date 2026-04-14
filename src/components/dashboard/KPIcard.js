@@ -2,13 +2,15 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { Card, Text } from "react-native-paper";
+import { useAppTheme } from "../../context/ThemeContext";
 
 export default function KPIcard({ label, value }) {
+  const { tokens } = useAppTheme();
   return (
-    <Card style={styles.card}>
+    <Card style={[styles.card, { backgroundColor: tokens.surface, borderColor: tokens.button }]}>
       <Card.Content style={{ alignItems: "center" }}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value}</Text>
+        <Text style={[styles.label, { color: tokens.heading }]}>{label}</Text>
+        <Text style={[styles.value, { color: tokens.text }]}>{value}</Text>
 
       </Card.Content>
     </Card>
@@ -20,7 +22,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#134234',
     borderColor: '#4bc78a',
     borderWidth: 1,
-    width: "48%",
+    width: "100%",
     marginBottom: 10,
     padding: 5,
   },

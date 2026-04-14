@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, Modal, FlatList } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import TaskList from "./TaskList";
+import { useAppTheme } from "../../context/ThemeContext";
+import { useThemedStyles } from "../../utils/useThemedStyles";
 
 const TABS = [
     { key: "all", label: "All Tasks", status: "all" },
@@ -18,6 +20,8 @@ const TABS = [
 export default function TaskTabs() {
     const [selectedStatus, setSelectedStatus] = useState("all");
     const [dropdownVisible, setDropdownVisible] = useState(false);
+    const { tokens } = useAppTheme();
+    const styles = useThemedStyles(createTaskTabsStyles);
     
     const currentLabel = TABS.find(tab => tab.status === selectedStatus)?.label || "All Tasks";
 
@@ -38,7 +42,7 @@ export default function TaskTabs() {
                     activeOpacity={0.7}
                 >
                     <Text style={styles.selectedValue}>{currentLabel}</Text>
-                    <MaterialIcons name="arrow-drop-down" size={24} color="#62ce99" />
+                    <MaterialIcons name="arrow-drop-down" size={24} color={tokens.icon} />
                 </TouchableOpacity>
             </View>
 
@@ -58,7 +62,7 @@ export default function TaskTabs() {
                         <View style={styles.dropdownHeader}>
                             <Text style={styles.dropdownTitle}>Select Task Status</Text>
                             <TouchableOpacity onPress={() => setDropdownVisible(false)}>
-                                <MaterialIcons name="close" size={24} color="#666" />
+                                <MaterialIcons name="close" size={24} color={tokens.icon} />
                             </TouchableOpacity>
                         </View>
                         
@@ -80,7 +84,7 @@ export default function TaskTabs() {
                                         {item.label}
                                     </Text>
                                     {selectedStatus === item.status && (
-                                        <MaterialIcons name="check" size={20} color="#000000" />
+                                        <MaterialIcons name="check" size={20} color={tokens.text} />
                                     )}
                                 </TouchableOpacity>
                             )}
@@ -94,90 +98,89 @@ export default function TaskTabs() {
     );
 }
 
-const styles = StyleSheet.create({
+const createTaskTabsStyles = (tokens) =>
+  StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
+      flex: 1,
+      backgroundColor: tokens.blockSecondary,
     },
     pickerContainer: {
-        backgroundColor: '#edf9f3',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-        elevation: 2,
+      backgroundColor: tokens.block,
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: tokens.border,
+      elevation: 2,
     },
     label: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#333333',
-        marginBottom: 8,
+      fontSize: 14,
+      fontWeight: "600",
+      color: tokens.text,
+      marginBottom: 8,
     },
     customPicker: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#f8f9fa',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: tokens.surface,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: tokens.border,
     },
     selectedValue: {
-        fontSize: 16,
-        color: '#000000',
+      fontSize: 16,
+      color: tokens.text,
     },
     modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "center",
+      alignItems: "center",
     },
     dropdown: {
-        backgroundColor: '#134234',
-        borderRadius: 12,
-        width: '85%',
-        maxHeight: '80%',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        overflow: 'hidden',
+      backgroundColor: tokens.surface,
+      borderRadius: 12,
+      width: "85%",
+      maxHeight: "80%",
+      elevation: 5,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      overflow: "hidden",
     },
     dropdownHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-        backgroundColor: '#134234',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: tokens.border,
+      backgroundColor: tokens.header,
     },
     dropdownTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#d6e07e',
-        
+      fontSize: 18,
+      fontWeight: "bold",
+      color: tokens.heading,
     },
     dropdownItem: {
-         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: tokens.border,
     },
-    // This is the key style - background color for selected item in dropdown
     dropdownItemSelected: {
-        backgroundColor: '#d6e07e',  // Light green background for selected item
+      backgroundColor: tokens.button,
     },
     dropdownItemText: {
-        fontSize: 16,
-        color: '#4bc78a',
+      fontSize: 16,
+      color: tokens.text,
     },
     dropdownItemTextSelected: {
-        color: '#000000',  // Green text for selected item
-        fontWeight: '600',
+      color: tokens.buttonText,
+      fontWeight: "600",
     },
-});
+  });

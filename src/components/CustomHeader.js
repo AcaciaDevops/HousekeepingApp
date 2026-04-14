@@ -1,5 +1,5 @@
-// src/components/CustomHeader.js (with hamburger menu)
-import React, { useState } from 'react';
+// src/components/CustomHeader.js
+import React, { useMemo, useState } from 'react';
 import {
     View,
     Text,
@@ -8,49 +8,53 @@ import {
     StyleSheet,
     Modal,
     Pressable,
-    Alert,
 } from 'react-native';
 import NotificationBell from "../components/notifications/NotificationBell.js";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
-import  useAuth  from '../features/auth/hooks/useAuth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import useAuth from '../features/auth/hooks/useAuth';
+import { useAppTheme } from '../context/ThemeContext';
 
 export default function CustomHeader({user, isExpanded, setIsExpanded, ...props }) {
      const {  logout } = useAuth();
     const navigation = useNavigation();
     const [dropdownVisible, setDropdownVisible] = useState(false);
+  const { tokens } = useAppTheme();
+    const styles = useMemo(() => createStyles(tokens), [tokens]);
   const toggleDrawer = () => {
         setIsExpanded(!isExpanded);
     };
     
     async function handleLogout() {
-  await logout();
-}
+        setDropdownVisible(false);
+        await logout();
+    }
+
     return (
         <View style={styles.container}>
+            {/* Left: Hamburger Menu */}
             <View style={styles.leftContainer}>
                 <TouchableOpacity
                     onPress={toggleDrawer}
-                    style={styles.menuButton}
+                    style={styles.iconButton}
                 >
-                    <MaterialIcons name="menu" size={28} color="#000" />
+                    <MaterialIcons name="menu" size={28} color={tokens.icon} />
                 </TouchableOpacity>
             </View>
-            
+
+            {/* Center: Title */}
             <View style={styles.centerContainer}>
                 <Text style={styles.title}>PMS App</Text>
             </View>
 
+            {/* Right: Notifications + Profile */}
             <View style={styles.rightContainer}>
-                  <View >
-                        <NotificationBell />
-                      </View>
+                <NotificationBell />
+                
                 <TouchableOpacity
                     onPress={() => setDropdownVisible(!dropdownVisible)}
                     style={styles.userImageButton}
                 >
-                    {console.log("user::",user)}
                     {user?.profile_image ? (
                         <Image
                             source={{ uri: user.profile_image }}
@@ -58,13 +62,13 @@ export default function CustomHeader({user, isExpanded, setIsExpanded, ...props 
                         />
                     ) : (
                         <View style={styles.userImagePlaceholder}>
-                            <MaterialIcons name="person" size={24} color="#fff" />
+                            <MaterialIcons name="person" size={24} color={tokens.button} />
                         </View>
                     )}
                 </TouchableOpacity>
             </View>
 
-            {/* Dropdown Modal (same as before) */}
+            {/* Profile Dropdown Modal */}
             <Modal
                 visible={dropdownVisible}
                 transparent={true}
@@ -84,30 +88,22 @@ export default function CustomHeader({user, isExpanded, setIsExpanded, ...props 
                                 />
                             ) : (
                                 <View style={styles.dropdownUserImagePlaceholder}>
-                                    <MaterialIcons name="person" size={30} color="#62ce99" />
+                                    <MaterialIcons name="person" size={30} color={tokens.button} />
                                 </View>
                             )}
                             <View style={styles.userInfo}>
-                                <Text style={styles.userName}>{user?.name || user?.user_email|| 'User'}</Text>
+                                <Text style={styles.userName} numberOfLines={1}>
+                                    {user?.user_first_name || user?.user_email || 'User'}
+                                </Text>
                                 <Text style={styles.userRole}>{user?.user_role_name || 'User'}</Text>
                             </View>
-                             <TouchableOpacity
-                            style={styles.dropdownItem}
-                            onPress={handleLogout}
-                        >
-                            <MaterialIcons name="logout" size={20} color="#00000" />
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.logoutButton}
+                                onPress={handleLogout}
+                            >
+                                <MaterialIcons name="logout" size={22} color={tokens.icon} />
+                            </TouchableOpacity>
                         </View>
-                        
-                       
-                        
-                        {/* <TouchableOpacity
-                            style={styles.dropdownItem}
-                            onPress={handleLogout}
-                        >
-                            <MaterialIcons name="logout" size={20} color="#00000" />
-                            <Text style={styles.logoutText}>Logout</Text>
-                        </TouchableOpacity> */}
                     </View>
                 </Pressable>
             </Modal>
@@ -115,116 +111,124 @@ export default function CustomHeader({user, isExpanded, setIsExpanded, ...props 
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        height: 60,
-        backgroundColor: '#1c1e1f',
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-    },
-    leftContainer: {
-        flex: 1,
-        alignItems: 'flex-start',
-    },
-    centerContainer: {
-        flex: 2,
-        alignItems: 'center',
-    },
-    rightContainer: {
-          flexDirection: 'row',
-        flex: 1,
-        alignItems: 'flex-end',
-    },
-    menuButton: {
-        padding: 8,
-    },
-    title: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#d6e07e',
-    },
-    userImageButton: {
-        padding: 10,
-    },
-    userImage: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 2,
-        borderColor: '#62ce99',
-    },
-    userImagePlaceholder: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#62ce99',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-end',
-    },
-    dropdown: {
-        position: 'absolute',
-        top: 55,
-        right: 16,
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        width: 300,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        overflow: 'hidden',
-    },
-    dropdownHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-        backgroundColor: '#f8f9fa',
-    },
-    dropdownUserImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        marginRight: 12,
-    },
-    dropdownUserImagePlaceholder: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: '#edf9f3',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    userInfo: {
-        flex: 1,
-    },
-    userName: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#000',
-    },
-    userRole: {
-        fontSize: 12,
-        color: '#666',
-        marginTop: 2,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: '#e0e0e0',
-    },
-  
-});
+const createStyles = (tokens) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 8,
+            height: 60,
+            backgroundColor: tokens.header,
+            elevation: 4,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+            zIndex: 10,
+        },
+        leftContainer: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        centerContainer: {
+            flex: 2,
+            alignItems: 'center',
+        },
+        rightContainer: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+        },
+        iconButton: {
+            padding: 8,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        title: {
+            fontSize: 24,
+            fontWeight: '700',
+            color: tokens.heading,
+        },
+        userImageButton: {
+            marginLeft: 4,
+            padding: 4,
+        },
+        userImage: {
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            borderWidth: 1.5,
+            borderColor: tokens.button,
+        },
+        userImagePlaceholder: {
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: tokens.block,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: tokens.border,
+        },
+        modalOverlay: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        },
+        dropdown: {
+            position: 'absolute',
+            top: 65,
+            right: 16,
+            backgroundColor: tokens.surface,
+            borderRadius: 12,
+            width: 280,
+            elevation: 5,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
+            overflow: 'hidden',
+        },
+        dropdownHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 16,
+            backgroundColor: tokens.blockSecondary || tokens.surface,
+        },
+        dropdownUserImage: {
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            marginRight: 12,
+        },
+        dropdownUserImagePlaceholder: {
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: tokens.block,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+        },
+        userInfo: {
+            flex: 1,
+            justifyContent: 'center',
+        },
+        userName: {
+            fontSize: 15,
+            fontWeight: 'bold',
+            color: tokens.text,
+        },
+        userRole: {
+            fontSize: 12,
+            color: tokens.info,
+            marginTop: 1,
+        },
+        logoutButton: {
+            padding: 8,
+            backgroundColor: tokens.block,
+            borderRadius: 8,
+        },
+    });

@@ -15,6 +15,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import useAuth from '../hooks/useAuth';
 import AuthWrapper from './AuthWrapper';
 import AuthLogin from './AuthLogin';
+import { useAppTheme } from "../../../context/ThemeContext";
 
 // Images
 import logo from '../../../assets/acaciaLogo.svg';
@@ -26,6 +27,7 @@ export default function Login() {
   const { isLoggedIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 const [renderCount, setRenderCount] = useState(0);
+  const { tokens } = useAppTheme();
   // Get auth param from route params (similar to useSearchParams)
   const auth = route.params?.auth || null;
   // Track renders
@@ -51,10 +53,10 @@ const [renderCount, setRenderCount] = useState(0);
     <AuthWrapper>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        style={[styles.container, { backgroundColor: tokens.background }]}
       >
         <ScrollView 
-          contentContainerStyle={styles.scrollContainer}
+          contentContainerStyle={[styles.scrollContainer, { backgroundColor: tokens.background }]}
           showsVerticalScrollIndicator={false}
         >
           {/* Logo Section */}
@@ -75,16 +77,13 @@ const [renderCount, setRenderCount] = useState(0);
 
           {/* Welcome Section */}
           <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeText}>Welcome Back,</Text>
+            <Text style={[styles.welcomeText, { color: tokens.heading }]}>Welcome Back,</Text>
           </View>
 
           {/* Login and Register Section */}
           <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Login in to your account</Text>
+            <Text style={[styles.loginText, { color: tokens.text }]}>Login in to your account</Text>
             <TouchableOpacity onPress={handleRegisterNavigation}>
-              <Text style={[styles.registerText, { color: getPrimaryColor() }]}>
-                I don't have an account
-              </Text>
             </TouchableOpacity>
           </View>
 
@@ -113,11 +112,11 @@ const styles = StyleSheet.create({
   logoWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
   logoImage: {
     width: 40,
     height: 40,
+    marginRight: 8,
   },
   textImage: {
     width: 100,
@@ -151,8 +150,3 @@ const styles = StyleSheet.create({
   },
 });
 
-// Helper function to get primary color from your theme
-const getPrimaryColor = () => {
-  // Return your theme's primary color
-  return '#1976d2';
-};

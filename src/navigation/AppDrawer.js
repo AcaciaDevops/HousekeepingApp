@@ -10,10 +10,12 @@ import RoomsStack from "./RoomsStack";
 import TasksStack from "./TasksStack";
 import StaffStack from "./StaffStack";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useAppTheme } from "../context/ThemeContext";
 
 const Drawer = createDrawerNavigator();
 
 export default function AppDrawer({ user }) {
+    const { tokens } = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(true);
 
     return (
@@ -29,21 +31,22 @@ export default function AppDrawer({ user }) {
             screenOptions={{
                 drawerType: 'permanent', // Make drawer permanent
                 drawerStyle: {
-                    backgroundColor: '#ffffff',
+                    backgroundColor: tokens.drawer,
                     width: isExpanded ? 280 : 50, // Dynamic width
                 },
                  headerShown: false, 
                 headerStyle: {
-                    backgroundColor: '#fff',
+                    backgroundColor: tokens.header,
                 },
-                // header: () => <CustomHeader user={user} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />,
-                headerTintColor: '#000000',
+                headerTintColor: tokens.text,
                 headerTitleStyle: {
                     fontWeight: 'bold',
+                    color: tokens.heading,
                 },
-                drawerActiveTintColor: '#62ce99',
-                drawerInactiveTintColor: '#000000',
-                drawerActiveBackgroundColor: '#edf9f3',
+                // Drawer item styles
+                drawerActiveTintColor: tokens.button,
+                drawerInactiveTintColor: tokens.text,
+                drawerActiveBackgroundColor: tokens.block,
                 drawerInactiveBackgroundColor: 'transparent',
                 drawerLabelStyle: {
                     fontSize: 14,

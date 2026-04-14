@@ -6,10 +6,12 @@ import {
   Linking,
   StyleSheet,
 } from 'react-native';
+import { useAppTheme } from '../../../context/ThemeContext';
 
 // ==============================|| FOOTER - AUTHENTICATION ||============================== //
 
 export default function AuthFooter() {
+  const { tokens } = useAppTheme();
   const handleLinkPress = (url) => {
     Linking.openURL(url);
   };
@@ -20,16 +22,16 @@ export default function AuthFooter() {
         {/* Links container */}
         <View style={styles.linksContainer}>
           <TouchableOpacity onPress={() => handleLinkPress('https://acaciagreentechnologies.co.uk/')}>
-            <Text style={styles.linkText}>Terms and Conditions</Text>
+            <Text style={[styles.linkText, { color: tokens.info }]}>Terms and Conditions</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity onPress={() => handleLinkPress('https://acaciagreentechnologies.co.uk/')}>
-            <Text style={styles.linkText}>Privacy Policy</Text>
+         
+         <TouchableOpacity onPress={() => handleLinkPress('https://acaciagreentechnologies.co.uk/')}>
+            <Text style={[styles.linkText, { color: tokens.info }]}>Privacy Policy</Text>
           </TouchableOpacity>
         </View>
 
         {/* Copyright text */}
-        <Text style={styles.copyrightText}>
+        <Text style={[styles.copyrightText, { color: tokens.text }]}>
           Copyright © Acacia Green Technologies Ltd. All Rights Reserved.
         </Text>
       </View>
@@ -70,6 +72,7 @@ const styles = StyleSheet.create({
 
 // Alternative responsive version with different layout on larger screens (tablet/desktop)
 export const ResponsiveAuthFooter = () => {
+  const { tokens } = useAppTheme();
   const handleLinkPress = (url) => {
     Linking.openURL(url);
   };
@@ -79,15 +82,15 @@ export const ResponsiveAuthFooter = () => {
       <View style={responsiveStyles.contentContainer}>
         <View style={responsiveStyles.linksContainer}>
           <TouchableOpacity onPress={() => handleLinkPress('https://acaciagreentechnologies.co.uk/')}>
-            <Text style={responsiveStyles.linkText}>Terms and Conditions</Text>
+            <Text style={[responsiveStyles.linkText, { color: tokens.info }]}>Terms and Conditions</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity onPress={() => handleLinkPress('https://acaciagreentechnologies.co.uk/')}>
-            <Text style={responsiveStyles.linkText}>Privacy Policy</Text>
+         
+         <TouchableOpacity onPress={() => handleLinkPress('https://acaciagreentechnologies.co.uk/')}>
+            <Text style={[responsiveStyles.linkText, { color: tokens.info }]}>Privacy Policy</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={responsiveStyles.copyrightText}>
+        <Text style={[responsiveStyles.copyrightText, { color: tokens.text }]}>
           Copyright © Acacia Green Technologies Ltd. All Rights Reserved.
         </Text>
       </View>
