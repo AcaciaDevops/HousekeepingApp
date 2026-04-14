@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  View,
-  StyleSheet,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { useAppTheme } from '../../../context/ThemeContext';
 
 export default function AuthCard({ children }) {
+  const { tokens } = useAppTheme();
+
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: tokens.surface, borderColor: tokens.border }]}>
       {children}
     </View>
   );
@@ -19,14 +19,14 @@ AuthCard.propTypes = {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'white',
     borderRadius: 12,
-    padding: 24,
+    padding: 10,
     margin: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 1,
   },
 });

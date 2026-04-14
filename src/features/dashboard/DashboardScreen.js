@@ -1,7 +1,9 @@
 // src/features/dashboard/DashboardScreen.js
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import KPIcard from "../../components/dashboard/KPIcard.js";
+import { useAppTheme } from "../../context/ThemeContext";
+import { ThemedScrollView } from "../../components/ui";
 
 import { fetchTotalRooms, fetchTotalVacantCleanRooms, fetchTotalVacantDirtyRooms, fetchTotalInspectionRooms } from "../../api/RoomApi";
 import { fetchTotalProgressTaskRooms, fetchTotalPendingTaskRooms } from "../../api/TasksApi.js";
@@ -14,6 +16,7 @@ export default function DashboardScreen() {
   const [totalInspectionRooms, setTotalInspectionRooms] = useState();
   const [totalProgressTaskRooms, setTotalProgressTaskRooms] = useState();
   const [totalPendingTaskRooms, setTotalPendingTaskRooms] = useState();
+  const { tokens } = useAppTheme();
   useEffect(() => {
     loadTotalRooms();
     loadTotalVacantDirtyRooms();
@@ -107,18 +110,33 @@ export default function DashboardScreen() {
     }
   }
   return (
-    <ScrollView style={styles.container}>
-        <View style={styles.grid}>
+    <ThemedScrollView contentContainerStyle={styles.page}>
+      <View style={styles.grid}>
         {kpis.map((kpi, index) => (
-          <KPIcard key={index} label={kpi.label} value={kpi.value} />
+          <View key={index} style={styles.kpiItem}>
+            <KPIcard label={kpi.label} value={kpi.value} />
+          </View>
         ))}
       </View>
-
-    </ScrollView>
+    </ThemedScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10 ,backgroundColor:'#1c1e1f'},
-  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" ,margin:15},
+  page: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 24,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  kpiItem: {
+    flexBasis: "48%",
+    maxWidth: "48%",
+    marginBottom: 16,
+  },
 });

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Alert,
   Switch,
@@ -12,26 +11,28 @@ import {
 import {
   Card,
   Title,
-  Paragraph,
   Button,
   TextInput,
   Avatar,
-  IconButton,
   Divider,
-  ActivityIndicator,
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'react-native-image-picker';
 import  useAuth  from '../../features/auth/hooks/useAuth';
 import { useNavigation } from '@react-navigation/native';
+import { useAppTheme } from '../../context/ThemeContext';
+import { useThemedStyles } from '../../utils/useThemedStyles';
+import { ThemedScrollView } from '../../components/ui';
 
 const ProfileScreen = () => {
   const { user, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState(true);
- const navigation = useNavigation();
+  const navigation = useNavigation();
+  const { tokens } = useAppTheme();
+  const styles = useThemedStyles(createProfileStyles);
   const [profileData, setProfileData] = useState({
     user_first_name: '',
     user_last_name:'',
@@ -101,7 +102,7 @@ const roleLabelMap = {
 };
 
   return (
-    <ScrollView style={styles.container}>
+    <ThemedScrollView contentContainerStyle={styles.scrollContent}>
       {/* Header with Background */}
       <View style={styles.header}>
         <View style={styles.headerOverlay} />
@@ -127,8 +128,8 @@ const roleLabelMap = {
             </View>
           )}
         </TouchableOpacity>
-        <Text style={styles.userName}>{profileData.user_first_name || 'User Name'}</Text>
-        <Text style={styles.userRole}>
+          <Text style={styles.userName}>{profileData.user_first_name || 'User Name'}</Text>
+          <Text style={styles.userRole}>
             {roleLabelMap[profileData?.user_role_name] || "User"}
           </Text>
       </View>
@@ -143,7 +144,7 @@ const roleLabelMap = {
           <Divider style={styles.divider} />
           
           <View style={styles.infoRow}>
-            <Icon name="person-outline" size={20} color="#666" style={styles.infoIcon} />
+            <Icon name="person-outline" size={20} color={tokens.icon} style={styles.infoIcon} />
             {isEditing ? (
               <TextInput
                 label="Full Name"
@@ -162,7 +163,7 @@ const roleLabelMap = {
           </View>
           
           <View style={styles.infoRow}>
-            <Icon name="email-outline" size={20} color="#666" style={styles.infoIcon} />
+            <Icon name="mail-outline" size={20} color={tokens.icon} style={styles.infoIcon} />
             {isEditing ? (
               <TextInput
                 label="Email"
@@ -182,7 +183,7 @@ const roleLabelMap = {
           </View>
           
           <View style={styles.infoRow}>
-            <Icon name="call-outline" size={20} color="#666" style={styles.infoIcon} />
+            <Icon name="call-outline" size={20} color={tokens.icon} style={styles.infoIcon} />
             {isEditing ? (
               <TextInput
                 label="Phone Number"
@@ -202,7 +203,7 @@ const roleLabelMap = {
           </View>
           
           <View style={styles.infoRow}>
-            <Icon name="briefcase-outline" size={20} color="#666" style={styles.infoIcon} />
+            <Icon name="briefcase-outline" size={20} color={tokens.icon} style={styles.infoIcon} />
             {isEditing ? (
               <TextInput
                 label="Position"
@@ -231,14 +232,15 @@ const roleLabelMap = {
           
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Icon name="notifications-outline" size={24} color="#666" />
-              <Text style={styles.settingLabel}>Push Notifications</Text>
-            </View>
-            <Switch
-              value={notifications}
-              onValueChange={setNotifications}
-              trackColor={{ false: '#767577', true: '#007AFF' }}
-            />
+            <Icon name="notifications-outline" size={24} color={tokens.icon} />
+            <Text style={styles.settingLabel}>Push Notifications</Text>
+          </View>
+          <Switch
+            value={notifications}
+            onValueChange={setNotifications}
+            trackColor={{ false: tokens.border, true: tokens.button }}
+            thumbColor={notifications ? tokens.button : tokens.surface}
+          />
           </View>
           
        
@@ -253,252 +255,205 @@ const roleLabelMap = {
           <Divider style={styles.divider} />
           
           <TouchableOpacity style={styles.aboutItem}>
-            <Icon name="information-circle-outline" size={24} color="#666" />
+            <Icon name="information-circle-outline" size={24} color={tokens.icon} />
             <Text style={styles.aboutText}>App Version 1.0.0</Text>
           </TouchableOpacity>
-          
+         
           <TouchableOpacity style={styles.aboutItem}>
-            <Icon name="document-text-outline" size={24} color="#666" />
+            <Icon name="document-text-outline" size={24} color={tokens.icon} />
             <Text style={styles.aboutText}>Terms & Conditions</Text>
           </TouchableOpacity>
-          
+         
           <TouchableOpacity style={styles.aboutItem}>
-            <Icon name="shield-outline" size={24} color="#666" />
+            <Icon name="shield-outline" size={24} color={tokens.icon} />
             <Text style={styles.aboutText}>Privacy Policy</Text>
           </TouchableOpacity>
-          
+         
           <TouchableOpacity style={styles.aboutItem}>
-            <Icon name="email-outline" size={24} color="#666" />
+            <Icon name="mail-outline" size={24} color={tokens.icon} />
             <Text style={styles.aboutText}>Support & Feedback</Text>
           </TouchableOpacity>
         </Card.Content>
       </Card>
 
       {/* Logout Button */}
-   <Button
-  mode="contained"
-  onPress={handleLogout}
-  style={styles.logoutButton}
-  buttonColor="#FF3B30"
-  icon="logout"
->
-        <Icon name="log-out-outline" size={20} color="#fff" style={styles.logoutIcon} />
+      <Button
+        mode="contained"
+        onPress={handleLogout}
+        style={styles.logoutButton}
+        icon="logout"
+        buttonColor={tokens.button}
+        textColor={tokens.buttonText}
+      >
         Logout
       </Button>
 
       <View style={styles.footer} />
-    </ScrollView>
+    </ThemedScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    height: 150,
-    backgroundColor: '#007AFF',
-    position: 'relative',
-  },
-  headerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 122, 255, 0.9)',
-  },
-  editHeaderButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  profileImageContainer: {
-    alignItems: 'center',
-    marginTop: -60,
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 4,
-    borderColor: '#fff',
-  },
-  profileAvatar: {
-    backgroundColor: '#fff',
-    borderWidth: 4,
-    borderColor: '#fff',
-    elevation: 5,
-  },
-  avatarLabel: {
-    fontSize: 48,
-    color: '#007AFF',
-  },
-  editImageBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#007AFF',
-    borderRadius: 20,
-    padding: 8,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 12,
-    color: '#333',
-  },
-  userRole: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 16,
-    marginBottom: 20,
-  },
-  statCard: {
-    flex: 1,
-    marginHorizontal: 5,
-    elevation: 3,
-  },
-  statContent: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 8,
-    color: '#333',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  infoCard: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    elevation: 2,
-  },
-  settingsCard: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    elevation: 2,
-  },
-  aboutCard: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    elevation: 2,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  editText: {
-    color: '#007AFF',
-    fontSize: 14,
-  },
-  divider: {
-    marginVertical: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    alignItems: 'flex-start',
-  },
-  infoIcon: {
-    marginRight: 12,
-    marginTop: 2,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  editInput: {
-    flex: 1,
-    backgroundColor: '#fff',
-    height: 40,
-  },
-  editActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 16,
-    gap: 12,
-  },
-  cancelButton: {
-    marginRight: 12,
-  },
-  saveButton: {
-    backgroundColor: '#007AFF',
-  },
-  settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  settingInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  settingLabel: {
-    fontSize: 16,
-    marginLeft: 12,
-    color: '#333',
-  },
-  languageSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  languageText: {
-    fontSize: 14,
-    color: '#666',
-    marginRight: 4,
-  },
-  aboutItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  aboutText: {
-    fontSize: 14,
-    color: '#333',
-    marginLeft: 12,
-  },
-  logoutButton: {
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 16,
-    paddingVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoutIcon: {
-    marginRight: 8,
-  },
-  footer: {
-    height: 20,
-  },
-});
+const createProfileStyles = (tokens) =>
+  StyleSheet.create({
+    scrollContent: {
+      flexGrow: 1,
+      backgroundColor: tokens.background,
+      paddingBottom: 40,
+    },
+    header: {
+      height: 150,
+      backgroundColor: tokens.header,
+      position: "relative",
+    },
+    headerOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0, 0, 0, 0.15)",
+    },
+    profileImageContainer: {
+      alignItems: "center",
+      marginTop: -60,
+      marginBottom: 20,
+    },
+    profileImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      borderWidth: 4,
+      borderColor: tokens.background,
+    },
+    profileAvatar: {
+      backgroundColor: tokens.surface,
+      borderWidth: 4,
+      borderColor: tokens.background,
+      elevation: 5,
+    },
+    avatarLabel: {
+      fontSize: 48,
+      color: tokens.button,
+    },
+    editImageBadge: {
+      position: "absolute",
+      bottom: 0,
+      right: 0,
+      backgroundColor: tokens.button,
+      borderRadius: 20,
+      padding: 8,
+      borderWidth: 2,
+      borderColor: tokens.background,
+    },
+    userName: {
+      fontSize: 24,
+      fontWeight: "bold",
+      marginTop: 12,
+      color: tokens.text,
+    },
+    userRole: {
+      fontSize: 14,
+      color: tokens.info,
+      marginTop: 4,
+    },
+    infoCard: {
+      marginHorizontal: 16,
+      marginBottom: 16,
+      elevation: 2,
+      backgroundColor: tokens.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: tokens.border,
+    },
+    settingsCard: {
+      marginHorizontal: 16,
+      marginBottom: 16,
+      elevation: 2,
+      backgroundColor: tokens.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: tokens.border,
+    },
+    aboutCard: {
+      marginHorizontal: 16,
+      marginBottom: 16,
+      elevation: 2,
+      backgroundColor: tokens.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: tokens.border,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 8,
+      color: tokens.heading,
+    },
+    divider: {
+      marginVertical: 12,
+      backgroundColor: tokens.border,
+    },
+    infoRow: {
+      flexDirection: "row",
+      marginBottom: 20,
+      alignItems: "flex-start",
+    },
+    infoIcon: {
+      marginRight: 12,
+      marginTop: 2,
+    },
+    infoLabel: {
+      fontSize: 12,
+      color: tokens.info,
+      marginBottom: 4,
+    },
+    infoValue: {
+      fontSize: 16,
+      color: tokens.text,
+      fontWeight: "500",
+    },
+    editInput: {
+      flex: 1,
+      backgroundColor: tokens.background,
+      height: 40,
+      color: tokens.text,
+    },
+    settingRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    settingInfo: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    settingLabel: {
+      fontSize: 16,
+      marginLeft: 12,
+      color: tokens.text,
+    },
+    aboutItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    aboutText: {
+      fontSize: 14,
+      color: tokens.text,
+      marginLeft: 12,
+    },
+    logoutButton: {
+      marginHorizontal: 16,
+      marginTop: 8,
+      marginBottom: 16,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+    footer: {
+      height: 20,
+    },
+  });
 
 export default ProfileScreen;

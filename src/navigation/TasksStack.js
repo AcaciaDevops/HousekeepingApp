@@ -6,11 +6,13 @@ import TasksScreen from "../features/tasks/TasksScreen";
 import CreateTaskScreen from "../features/tasks/CreateTaskScreen";
 import ViewTasksScreen from "../features/tasks/ViewTaskScreen";
 import AssignTaskScreen from "../features/tasks/AssignTaskScreen";
+import { useAppTheme } from "../context/ThemeContext";
 
 const Stack = createNativeStackNavigator();
 
 export default function TaskStack() {
   const { user } = useAuth();
+  const { tokens } = useAppTheme();
 
   const isManager =
     user?.user_role_name === "MaintenanceManager" ||
@@ -19,7 +21,13 @@ export default function TaskStack() {
   console.log("user:stack::", user);
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: tokens.header },
+        headerTintColor: tokens.text,
+        contentStyle: { backgroundColor: tokens.background },
+      }}
+    >
       <Stack.Screen
         name="TasksHome"
         component={TasksScreen}

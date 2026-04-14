@@ -14,18 +14,20 @@ import {
 import AuthFooter from './AuthFooter'; // Update path
 import AuthCard from './AuthCard';
 import AuthBackground from './AuthBackground';
+import { useAppTheme } from '../../../context/ThemeContext';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 // ==============================|| AUTHENTICATION - WRAPPER ||============================== //
 
 export default function AuthWrapper({ children }) {
+  const { tokens } = useAppTheme();
    React.useEffect(() => {
         console.log("🔄 AuthWrapper mounted");
         return () => console.log("🔄 AuthWrapper unmounted");
     }, []);
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: tokens.background }]}>
       {/* Background component */}
       <AuthBackground />
       

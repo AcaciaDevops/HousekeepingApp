@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
+import { TextInput, Button } from "react-native-paper";
+import { useAppTheme } from "../../context/ThemeContext";
+import { useThemedStyles } from "../../utils/useThemedStyles";
+import { ThemedScreen, ThemedScrollView } from "../../components/ui";
 
 export default function AssignTaskScreen({ route, navigation }) {
-  const  staff  = route?.params?.staff;
-  if (!staff) {
-    return <Text>No staff data</Text>;
-  }
+  const staff = route?.params?.staff;
+  const { tokens } = useAppTheme();
+  const styles = useThemedStyles(createStyles);
+
   const [taskType, setTaskType] = useState("");
   const [rooms, setRooms] = useState("");
   const [priority, setPriority] = useState("Medium");
@@ -30,95 +34,151 @@ export default function AssignTaskScreen({ route, navigation }) {
     navigation.goBack();
   };
 
+  if (!staff) {
+    return (
+      <ThemedScreen>
+        <View style={styles.page}>
+          <Text style={styles.emptyText}>No staff data available.</Text>
+        </View>
+      </ThemedScreen>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      {/* <Text style={styles.title}>Assign Task</Text> */}
+    <ThemedScreen>
+      <ThemedScrollView contentContainerStyle={styles.page}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Assign Task</Text>
 
-      <Text style={styles.staff}>Staff: {staff.name}</Text>
+          <Text style={styles.label}>Staff</Text>
+          <Text style={styles.staffName}>{staff.name}</Text>
 
-      <TextInput
-        placeholder="Task Type (e.g. Deep Cleaning)"
-        value={taskType}
-        onChangeText={setTaskType}
-        style={styles.input}
-      />
+          <TextInput
+            label="Task Type"
+            value={taskType}
+            onChangeText={setTaskType}
+            mode="outlined"
+            style={styles.input}
+            textColor={tokens.text}
+            outlineColor={tokens.border}
+          />
 
-      <TextInput
-        placeholder="Rooms (e.g. 101,102)"
-        value={rooms}
-        onChangeText={setRooms}
-        style={styles.input}
-      />
+          <TextInput
+            label="Rooms"
+            value={rooms}
+            onChangeText={setRooms}
+            mode="outlined"
+            style={styles.input}
+            textColor={tokens.text}
+            outlineColor={tokens.border}
+          />
 
-      <TextInput
-        placeholder="Priority (Low / Medium / High)"
-        value={priority}
-        onChangeText={setPriority}
-        style={styles.input}
-      />
+          <TextInput
+            label="Priority"
+            value={priority}
+            onChangeText={setPriority}
+            mode="outlined"
+            style={styles.input}
+            textColor={tokens.text}
+            outlineColor={tokens.border}
+          />
 
-      <TextInput
-        placeholder="Notes (optional)"
-        value={notes}
-        onChangeText={setNotes}
-        style={[styles.input, { height: 80 }]}
-        multiline
-      />
+          <TextInput
+            label="Notes"
+            value={notes}
+            onChangeText={setNotes}
+            mode="outlined"
+            multiline
+            numberOfLines={4}
+            style={[styles.input, styles.multilineInput]}
+            textColor={tokens.text}
+            outlineColor={tokens.border}
+          />
 
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.cancel} onPress={() => navigation.goBack()}>
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.assign} onPress={handleAssign}>
-          <Text style={styles.assignText}>Assign</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          <View style={styles.buttonRow}>
+            <Button
+              mode="outlined"
+              onPress={() => navigation.goBack()}
+              style={styles.cancelButton}
+              buttonColor={tokens.surface}
+              textColor={tokens.text}
+            >
+              Cancel
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleAssign}
+              style={styles.assignButton}
+              buttonColor={tokens.button}
+              textColor={tokens.buttonText}
+            >
+              Assign
+            </Button>
+          </View>
+        </View>
+      </ThemedScrollView>
+    </ThemedScreen>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f6fa",
-    padding: 16,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 12,
-  },
-  staff: {
-    fontWeight: "600",
-    marginBottom: 12,
-  },
-  input: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 12,
-  },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-  cancel: {
-    padding: 12,
-  },
-  cancelText: {
-    color: "#888",
-    fontWeight: "600",
-  },
-  assign: {
-    backgroundColor: "#3498db",
-    padding: 12,
-    borderRadius: 8,
-  },
-  assignText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-});
+
+const createStyles = (tokens) =>
+  StyleSheet.create({
+    page: {
+      flex: 1,
+      backgroundColor: tokens.background,
+      padding: 16,
+    },
+    card: {
+      backgroundColor: tokens.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: tokens.border,
+      padding: 18,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: tokens.heading,
+      marginBottom: 16,
+    },
+    label: {
+      color: tokens.text,
+      fontSize: 14,
+      marginBottom: 6,
+      fontWeight: "600",
+    },
+    staffName: {
+      color: tokens.text,
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: 16,
+    },
+    input: {
+      backgroundColor: tokens.blockSecondary,
+      marginBottom: 16,
+    },
+    multilineInput: {
+      minHeight: 100,
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 10,
+    },
+    cancelButton: {
+      flex: 1,
+      borderRadius: 10,
+      borderColor: tokens.border,
+      borderWidth: 1,
+      marginRight: 8,
+    },
+    assignButton: {
+      flex: 1,
+      borderRadius: 10,
+    },
+    emptyText: {
+      color: tokens.text,
+      padding: 16,
+      fontSize: 16,
+    },
+  });

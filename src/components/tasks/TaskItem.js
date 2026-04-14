@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { Button, Menu } from "react-native-paper";
 import { updateTaskStatus } from "../../api/TasksApi";
-import  useAuth  from "../../features/auth/hooks/useAuth";
+import useAuth from "../../features/auth/hooks/useAuth";
+import { useAppTheme } from "../../context/ThemeContext";
+import { useThemedStyles } from "../../utils/useThemedStyles";
 
 const TASK_STATUSES = [
   "pending",
@@ -16,32 +18,30 @@ const TASK_STATUSES = [
 const ROLE_ALLOWED_STATUSES = {
   HousekeepingStaff: ["pending", "in_progress", "completed"],
   MaintenanceStaff: ["pending", "in_progress", "completed"],
-  MaintenanceManager:TASK_STATUSES,
+  MaintenanceManager: TASK_STATUSES,
   HousekeepingManager: TASK_STATUSES,
   Admin: TASK_STATUSES,
   supervisor: TASK_STATUSES,
 };
-export default function TaskCard({ task, onStatusUpdated, canComplete }) {
+
+export default function TaskCard({ task, onStatusUpdated }) {
   const { user } = useAuth();
-  const userRole = user?.user_role_name; // ensure this matches your user object
-console.log("userRole::",userRole)
-  const allowedStatuses =
-    ROLE_ALLOWED_STATUSES[userRole] || TASK_STATUSES;
+  const userRole = user?.user_role_name;
+  const allowedStatuses = ROLE_ALLOWED_STATUSES[userRole] || TASK_STATUSES;
   const [status, setStatus] = useState(task.task_status);
   const [menuVisible, setMenuVisible] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const { tokens } = useAppTheme();
+  const styles = useThemedStyles(createTaskItemStyles);
 
   const handleStatusChange = async (newStatus) => {
     if (newStatus === status) return;
 
     setUpdatingStatus(true);
     try {
-      console.log("task::details::1023",task)
-      const updatedTask = await updateTaskStatus(task.id, newStatus, task.task_type);
-      {console.log("updated task::12",updatedTask)}
+      await updateTaskStatus(task.id, newStatus, task.task_type);
       setStatus(newStatus);
       if (onStatusUpdated) onStatusUpdated(newStatus);
-      console.log("status::1",newStatus)
       Alert.alert("Success", `Task status updated to "${newStatus}"`);
     } catch (err) {
       console.error("Failed to update task status:", err);
@@ -53,10 +53,9 @@ console.log("userRole::",userRole)
   };
 
   return (
-    <View style={styles.taskCard}>
+    <View style={[styles.taskCard, { borderColor: tokens.border, backgroundColor: tokens.surface }]}>
       <View style={styles.taskHeader}>
-        <Text style={styles.taskName}>{task.task_name}</Text>
-
+        <Text style={[styles.taskName, { color: tokens.text }]}>{task.task_name}</Text>
 
         <Menu
           visible={menuVisible}
@@ -65,8 +64,9 @@ console.log("userRole::",userRole)
             <Button
               mode="contained"
               onPress={() => setMenuVisible(true)}
-              style={[styles.taskStatus, getTaskStatusColor(status)]}
+              style={[styles.taskStatus, getTaskStatusColor(status, tokens)]}
               loading={updatingStatus}
+              labelStyle={{ color: tokens.buttonText }}
             >
               {status.replace("_", " ")}
             </Button>
@@ -82,90 +82,70 @@ console.log("userRole::",userRole)
           ))}
         </Menu>
       </View>
-      {console.log("task :: ",task)}
-      <Text style={styles.taskName}>Room No: {task.room_id}</Text>
-       <Text style={styles.taskName}>Assign to: {task.assigned_to}</Text>
-      <Text style={styles.taskPriority}>Priority: {task.priority}</Text>
-      {task.notes ? <Text style={styles.taskNotes}>Notes: {task.notes}</Text> : null}
-      <Text style={styles.taskTimestamp}>
+      <Text style={[styles.taskName, { color: tokens.text }]}>Room No: {task.room_id}</Text>
+      <Text style={[styles.taskName, { color: tokens.text }]}>Assign to: {task.assigned_to}</Text>
+      <Text style={[styles.taskPriority, { color: tokens.info }]}>Priority: {task.priority}</Text>
+      {task.notes ? <Text style={[styles.taskNotes, { color: tokens.text }]}>Notes: {task.notes}</Text> : null}
+      <Text style={[styles.taskTimestamp, { color: tokens.text }]}>
         Assigned at: {formatDate(task.assigned_at)}
       </Text>
-      <Text style={styles.taskTimestamp}>
+      <Text style={[styles.taskTimestamp, { color: tokens.text }]}>
         Started at: {formatDate(task.started_at)}
       </Text>
-      <Text style={styles.taskTimestamp}>
+      <Text style={[styles.taskTimestamp, { color: tokens.text }]}>
         Completed at: {formatDate(task.completed_at)}
       </Text>
-      <Text style={styles.taskTimestamp}>
+      <Text style={[styles.taskTimestamp, { color: tokens.text }]}>
         Under Review at: {formatDate(task.under_review_at)}
       </Text>
-      <Text style={styles.taskTimestamp}>
+      <Text style={[styles.taskTimestamp, { color: tokens.text }]}>
         Approved at: {formatDate(task.approved_at)}
       </Text>
-      <Text style={styles.taskTimestamp}>
+      <Text style={[styles.taskTimestamp, { color: tokens.text }]}>
         Rejected at: {formatDate(task.rejected_at)}
       </Text>
-      <Text style={styles.taskTimestamp}>
+      <Text style={[styles.taskTimestamp, { color: tokens.text }]}>
         Reassigned at: {formatDate(task.reassigned_at)}
       </Text>
-
-
     </View>
   );
 }
+
 function formatDate(dateStr) {
-  if (!dateStr) return "—";        // fallback for null/undefined
+  if (!dateStr) return "—";
   const d = new Date(dateStr);
-  if (isNaN(d)) return "—";        // fallback for invalid date
-  return d.toLocaleString();        // format nicely
+  if (isNaN(d)) return "—";
+  return d.toLocaleString();
 }
 
-/* Status colors */
-function getTaskStatusColor(status) {
-  switch (status) {
-    case "pending":
-      return { backgroundColor: "#FF9800" };
-    case "in_progress":
-      return { backgroundColor: "#2196F3" };
-    case "completed":
-      return { backgroundColor: "#4CAF50" };
-    case "under_review":
-      return { backgroundColor: "#9C27B0" };
-    case "approved":
-      return { backgroundColor: "#009688" };
-    case "rejected":
-      return { backgroundColor: "#F44336" };
-    case "reassigned":
-      return { backgroundColor: "#607D8B" };
-    default:
-      return { backgroundColor: "#607D8B" };
-  }
+function getTaskStatusColor(status, tokens) {
+  return {
+    backgroundColor: tokens.taskStatus[status] || tokens.taskStatus.reassigned,
+  };
 }
 
-const styles = StyleSheet.create({
-  taskCard: {
-    backgroundColor: "#f9f9f9",
-    padding: 12,
-    marginVertical: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
-  taskHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  taskName: { fontSize: 16, fontWeight: "600", color: "#333" },
-  taskStatus: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    color: "#fff",
-    fontWeight: "600",
-  },
-  taskPriority: { fontSize: 14, color: "#555" },
-  taskNotes: { fontSize: 14, color: "#444" },
-  taskTimestamp: { fontSize: 12, color: "#888", marginTop: 4 },
-});
+const createTaskItemStyles = (tokens) =>
+  StyleSheet.create({
+    taskCard: {
+      padding: 12,
+      marginVertical: 6,
+      borderRadius: 10,
+      borderWidth: 1,
+    },
+    taskHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 6,
+    },
+    taskName: { fontSize: 16, fontWeight: "600" },
+    taskStatus: {
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      borderRadius: 12,
+      fontWeight: "600",
+    },
+    taskPriority: { fontSize: 14 },
+    taskNotes: { fontSize: 14 },
+    taskTimestamp: { fontSize: 12, marginTop: 4 },
+  });

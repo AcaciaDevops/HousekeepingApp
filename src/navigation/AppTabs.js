@@ -7,13 +7,29 @@ import TasksStack from "./TasksStack";
 import StaffStack from "./StaffStack";
 import ProfileScreen from "../features/profile/ProfileScreen";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useAppTheme } from "../context/ThemeContext";
 
 const Tab = createBottomTabNavigator();
 
 export default function AppTabs({ user }) {
-  console.log("user:1234",user)
+  const { tokens } = useAppTheme();
+
   return (
-    <Tab.Navigator screenOptions={{ headerShown: true }}>
+    <Tab.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: tokens.header },
+        headerTintColor: tokens.text,
+        tabBarStyle: {
+          backgroundColor: tokens.drawer,
+          borderTopColor: tokens.border,
+        },
+        tabBarActiveTintColor: tokens.button,
+        tabBarInactiveTintColor: tokens.text,
+        tabBarLabelStyle: {
+          fontWeight: "600",
+        },
+      }}
+    >
       {["HousekeepingManager", "FrontDesk", "MaintenanceManager"].includes(user.user_role_name) && (
         <Tab.Screen
           name="Dashboard"

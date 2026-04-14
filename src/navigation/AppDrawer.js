@@ -3,39 +3,41 @@ import React from "react";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import CustomDrawer from '../components/CustomDrawer';
 import CustomHeader from '../components/CustomHeader';
-import AppTabs from "./AppTabs";
 import ProfileScreen from "../features/profile/ProfileScreen";
 import DashboardScreen from "../features/dashboard/DashboardScreen";
 import RoomsStack from "./RoomsStack";
 import TasksStack from "./TasksStack";
 import StaffStack from "./StaffStack";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useAppTheme } from "../context/ThemeContext";
 
 const Drawer = createDrawerNavigator();
 
 export default function AppDrawer({ user }) {
+    const { tokens } = useAppTheme();
     return (
         <Drawer.Navigator
             initialRouteName="Home"
             drawerContent={(props) => <CustomDrawer {...props} user={user} />}
             screenOptions={{
                 drawerStyle: {
-                    backgroundColor: '#ffffff',
+                    backgroundColor: tokens.drawer,
                     width: 280,
                 },
                 headerStyle: {
-                    backgroundColor: '#fff',
+                    backgroundColor: tokens.header,
                 },
                 header: () => <CustomHeader user={user} />, 
-                headerTintColor: '#000000',
+                headerTintColor: tokens.text,
                 headerTitleStyle: {
                     fontWeight: 'bold',
+                    color: tokens.heading,
                 },
                 // Drawer item styles
-                drawerActiveTintColor: '#62ce99', // Green text when active/selected
-                drawerInactiveTintColor: '#000000', // Black text when inactive
-                drawerActiveBackgroundColor: '#edf9f3', // Light green background when selected (optional)
-                drawerInactiveBackgroundColor: 'transparent', // Transparent background when not selected
+                drawerActiveTintColor: tokens.button,
+                drawerInactiveTintColor: tokens.text,
+                drawerActiveBackgroundColor: tokens.block,
+                drawerInactiveBackgroundColor: 'transparent',
                 drawerLabelStyle: {
                     fontSize: 14,
                     fontWeight: '400',
