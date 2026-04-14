@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { createTask } from "../../api/TasksApi";
-import { useAuth } from "../../features/auth/hooks/useAuth";
+import  useAuth  from "../../features/auth/hooks/useAuth";
 
 export default function CreateTaskScreen({ navigation }) {
     const { user } = useAuth();

@@ -1,62 +1,158 @@
-import React from "react";
-import { View, StyleSheet, Alert } from "react-native";
-import { TextInput, Button, Title } from "react-native-paper";
-import { Formik } from "formik";
-import * as Yup from "yup";
-import { useAuth } from "../hooks/useAuth";
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-const schema = Yup.object().shape({
-  user_email: Yup.string().email("Invalid email").required("Required"),
-  user_password: Yup.string().min(4).required("Required"),
-});
+import useAuth from '../hooks/useAuth';
+import AuthWrapper from './AuthWrapper';
+import AuthLogin from './AuthLogin';
 
-export default function LoginScreen() {
-  const auth = useAuth();
+// Images
+import logo from '../../../assets/acaciaLogo.svg';
+import acaciaDark from '../../../assets/AcaciaDark.svg';
+
+export default function Login() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { isLoggedIn } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+const [renderCount, setRenderCount] = useState(0);
+  // Get auth param from route params (similar to useSearchParams)
+  const auth = route.params?.auth || null;
+  // Track renders
+  // React.useEffect(() => {
+  //   setRenderCount(prev => prev + 1);
+  //   console.log("📱 Login component rendered", renderCount + 1, "times");
+  // });
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleRegisterNavigation = () => {
+    if (isLoggedIn) {
+      navigation.navigate('Register');
+    } else if (auth) {
+      navigation.navigate('Register', { auth: 'jwt' });
+    } else {
+      navigation.navigate('Register');
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Title style={{ marginBottom: 20 }}>Acacia PMS</Title>
-      <Formik
-        initialValues={{ user_email: "", user_password: "" }}
-        validationSchema={schema}
-        onSubmit={async (values, { setSubmitting }) => {
-          setSubmitting(true);
-          const result = await auth.login(values);
-          setSubmitting(false);
-          if (result.success) {
-            // TODO: navigate based on user.role or default flow
-            Alert.alert("Login successful");
-          } else {
-            console.error(result.error);
-            Alert.alert("Login failed", result.error?.message || "Unknown error");
-          }
-        }}
+    <AuthWrapper>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
       >
-        {({ handleChange, handleSubmit, values }) => (
-          <>
-            <TextInput
-              label="Email"
-              value={values.user_email}
-              onChangeText={handleChange("user_email")}
-              style={{ marginBottom: 12 }}
-              autoCapitalize="none"
-            />
-            <TextInput
-              label="Password"
-              value={values.user_password}
-              onChangeText={handleChange("user_password")}
-              secureTextEntry
-              style={{ marginBottom: 12 }}
-            />
-            <Button mode="contained" loading={auth.isLoading} onPress={() => handleSubmit()}>
-              Login
-            </Button>
-          </>
-        )}
-      </Formik>
-    </View>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Logo Section */}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoWrapper}>
+              <Image 
+                source={logo} 
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+              <Image 
+                source={acaciaDark}
+                style={styles.textImage}
+                resizeMode="contain"
+              />
+            </View>
+          </View>
+
+          {/* Welcome Section */}
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>Welcome Back,</Text>
+          </View>
+
+          {/* Login and Register Section */}
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Login in to your account</Text>
+            <TouchableOpacity onPress={handleRegisterNavigation}>
+              <Text style={[styles.registerText, { color: getPrimaryColor() }]}>
+                I don't have an account
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Auth Form Section */}
+          <View style={styles.formContainer}>
+            <AuthLogin isDemo={isLoggedIn} showPassword={showPassword} onTogglePassword={handleClickShowPassword}   key="auth-login"/>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </AuthWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: "center" },
+  container: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+  },
+  logoContainer: {
+    marginBottom: 20,
+  },
+  logoWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
+  },
+  textImage: {
+    width: 100,
+    height: 30,
+  },
+  welcomeContainer: {
+    marginBottom: 8,
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'ios' ? 'Helvetica Neue' : 'Roboto',
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  loginText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  registerText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  formContainer: {
+    flex: 1,
+  },
 });
+
+// Helper function to get primary color from your theme
+const getPrimaryColor = () => {
+  // Return your theme's primary color
+  return '#1976d2';
+};

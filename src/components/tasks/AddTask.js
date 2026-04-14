@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { useAuth } from "../../features/auth/hooks/useAuth";
+import  useAuth  from "../../features/auth/hooks/useAuth";
 import {
   Modal,
   Portal,
@@ -24,7 +24,8 @@ export default function AddTaskComponent({
 }) {
    const { user } = useAuth();
      const userId = user?.user_id;
-     const userEmail = user?.user_email
+     const userEmail = user?.user_email;
+      const userRole = user?.user_role_name;
   const [tasks, setTasks] = useState([]);
   const [staff, setStaff] = useState([]);
 
@@ -45,7 +46,8 @@ export default function AddTaskComponent({
 
   async function loadData() {
     console.log("user info::",user)
-    const t = await fetchAllTasks();
+      const task_type = userRole == "MaintenanceManager" ? "maintenance": "housekeeping";
+    const t = await fetchAllTasks(task_type);
     const s = await fetchUserbyRole(role_name);
     console.log("all task fetched in add task screen : ", t)
     console.log("all task users in add task screen : ", s)

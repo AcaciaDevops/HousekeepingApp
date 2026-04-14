@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, FlatList } from "react-native";
 import { fetchTasks } from "../../api/TasksApi";
 import TaskItem from "./TaskItem"
-import { useAuth } from "../../features/auth/hooks/useAuth";
+import  useAuth  from "../../features/auth/hooks/useAuth";
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function TaskList({ route }) {

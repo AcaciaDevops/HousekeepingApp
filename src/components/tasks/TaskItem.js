@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { Button, Menu } from "react-native-paper";
 import { updateTaskStatus } from "../../api/TasksApi";
-import { useAuth } from "../../features/auth/hooks/useAuth";
+import  useAuth  from "../../features/auth/hooks/useAuth";
 
 const TASK_STATUSES = [
   "pending",

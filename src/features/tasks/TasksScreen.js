@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "react-native-paper";
 import TaskTabs from "../../components/tasks/TaskTabs";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../auth/hooks/useAuth";
+import  useAuth  from "../auth/hooks/useAuth";
 
 export default function TasksScreen() {
   const navigation = useNavigation();

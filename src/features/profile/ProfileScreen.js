@@ -23,7 +23,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'react-native-image-picker';
-import { useAuth } from '../../features/auth/hooks/useAuth';
+import  useAuth  from '../../features/auth/hooks/useAuth';
 import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = () => {

@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 import KPIcard from "../../components/dashboard/KPIcard.js";
-import NotificationBell from "../../components/notifications/NotificationBell.js";
+
 import { fetchTotalRooms, fetchTotalVacantCleanRooms, fetchTotalVacantDirtyRooms, fetchTotalInspectionRooms } from "../../api/RoomApi";
 import { fetchTotalProgressTaskRooms, fetchTotalPendingTaskRooms } from "../../api/TasksApi.js";
 
 export default function DashboardScreen() {
   const [totalRooms, setTotalRooms] = useState();
+    const [loading, setLoading] = useState(false);
   const [totalCleanRooms, setTotalCleanRooms] = useState();
   const [totalDirtyRooms, setTotalDirtyRooms] = useState();
   const [totalInspectionRooms, setTotalInspectionRooms] = useState();
@@ -107,10 +108,7 @@ export default function DashboardScreen() {
   }
   return (
     <ScrollView style={styles.container}>
-      <View style={{ padding: 20, display: "flex", justifyContent: "flex-end" }}>
-        <NotificationBell />
-      </View>
-      <View style={styles.grid}>
+        <View style={styles.grid}>
         {kpis.map((kpi, index) => (
           <KPIcard key={index} label={kpi.label} value={kpi.value} />
         ))}
@@ -121,6 +119,6 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10 },
-  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
+  container: { flex: 1, padding: 10 ,backgroundColor:'#1c1e1f'},
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" ,margin:15},
 });

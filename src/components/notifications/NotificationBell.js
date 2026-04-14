@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import { useAuth } from "../../features/auth/hooks/useAuth";
+import  useAuth  from "../../features/auth/hooks/useAuth";
 import { fetchUnReadNotifications,markReadNotifications } from "../../api/NotificationApi";
 import axios from "axios";
 

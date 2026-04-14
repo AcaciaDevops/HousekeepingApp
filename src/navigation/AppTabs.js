@@ -11,8 +11,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 const Tab = createBottomTabNavigator();
 
 export default function AppTabs({ user }) {
+  console.log("user:1234",user)
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
+    <Tab.Navigator screenOptions={{ headerShown: true }}>
       {["HousekeepingManager", "FrontDesk", "MaintenanceManager"].includes(user.user_role_name) && (
         <Tab.Screen
           name="Dashboard"

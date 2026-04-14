@@ -1,0 +1,115 @@
+// src/navigation/AppDrawer.js
+import React from "react";
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import CustomDrawer from '../components/CustomDrawer';
+import CustomHeader from '../components/CustomHeader';
+import AppTabs from "./AppTabs";
+import ProfileScreen from "../features/profile/ProfileScreen";
+import DashboardScreen from "../features/dashboard/DashboardScreen";
+import RoomsStack from "./RoomsStack";
+import TasksStack from "./TasksStack";
+import StaffStack from "./StaffStack";
+import { MaterialIcons } from "@expo/vector-icons";
+
+const Drawer = createDrawerNavigator();
+
+export default function AppDrawer({ user }) {
+    return (
+        <Drawer.Navigator
+            initialRouteName="Home"
+            drawerContent={(props) => <CustomDrawer {...props} user={user} />}
+            screenOptions={{
+                drawerStyle: {
+                    backgroundColor: '#ffffff',
+                    width: 280,
+                },
+                headerStyle: {
+                    backgroundColor: '#fff',
+                },
+                header: () => <CustomHeader user={user} />, 
+                headerTintColor: '#000000',
+                headerTitleStyle: {
+                    fontWeight: 'bold',
+                },
+                // Drawer item styles
+                drawerActiveTintColor: '#62ce99', // Green text when active/selected
+                drawerInactiveTintColor: '#000000', // Black text when inactive
+                drawerActiveBackgroundColor: '#edf9f3', // Light green background when selected (optional)
+                drawerInactiveBackgroundColor: 'transparent', // Transparent background when not selected
+                drawerLabelStyle: {
+                    fontSize: 14,
+                    fontWeight: '400',
+                    marginLeft: -16, // Adjust label position
+                },
+                drawerItemStyle: {
+                    borderRadius: 0,
+                    marginHorizontal: 0,
+                    marginVertical: 4,
+                },
+            }}
+        >
+            {["HousekeepingManager", "FrontDesk", "MaintenanceManager"].includes(user.user_role_name) && (
+                <Drawer.Screen
+                    name="Dashboard"
+                    component={DashboardScreen}
+                    options={{
+                        drawerIcon: ({ color, size }) => (
+                            <MaterialIcons name="dashboard" size={size} color={color} />
+                        ),
+                        drawerLabel: 'Dashboard',
+                    }}
+                />
+            )}
+            
+            {["HousekeepingManager", "HousekeepingStaff"].includes(user.user_role_name) && (
+                <Drawer.Screen
+                    name="Rooms"
+                    component={RoomsStack}
+                    options={{
+                        drawerIcon: ({ color, size }) => (
+                            <MaterialIcons name="meeting-room" size={size} color={color} />
+                        ),
+                        drawerLabel: 'Rooms',
+                    }}
+                />
+            )}
+
+            {["HousekeepingManager", "HousekeepingStaff", "MaintenanceManager", "MaintenanceStaff"].includes(user.user_role_name) && (
+                <Drawer.Screen
+                    name="Tasks"
+                    component={TasksStack}
+                    options={{
+                        drawerIcon: ({ color, size }) => (
+                            <MaterialIcons name="task" size={size} color={color} />
+                        ),
+                        drawerLabel: 'Tasks',
+                    }}
+                />
+            )}
+
+            {["HousekeepingManager", "MaintenanceManager"].includes(user.user_role_name) && (
+                <Drawer.Screen
+                    name="Staff"
+                    component={StaffStack}
+                    options={{
+                        drawerIcon: ({ color, size }) => (
+                            <MaterialIcons name="group" size={size} color={color} />
+                        ),
+                        drawerLabel: 'Staff',
+                    }}
+                />
+            )}
+
+            <Drawer.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                    drawerIcon: ({ color, size }) => (
+                        <MaterialIcons name="person" size={size} color={color} />
+                    ),
+                    drawerLabel: 'Profile',
+                }}
+            />
+        </Drawer.Navigator>
+    );
+}

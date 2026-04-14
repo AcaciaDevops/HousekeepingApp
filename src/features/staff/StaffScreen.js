@@ -1,7 +1,7 @@
 // src/features/staff/StaffScreen.js
 import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../../features/auth/hooks/useAuth";
+import  useAuth  from "../../features/auth/hooks/useAuth";
 import { TextInput } from "react-native";
 import {
   View,
