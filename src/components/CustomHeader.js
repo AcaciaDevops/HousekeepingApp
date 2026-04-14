@@ -16,11 +16,14 @@ import { useNavigation, DrawerActions } from '@react-navigation/native';
 import  useAuth  from '../features/auth/hooks/useAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function CustomHeader({user}) {
+export default function CustomHeader({user, isExpanded, setIsExpanded, ...props }) {
      const {  logout } = useAuth();
     const navigation = useNavigation();
     const [dropdownVisible, setDropdownVisible] = useState(false);
-
+  const toggleDrawer = () => {
+        setIsExpanded(!isExpanded);
+    };
+    
     async function handleLogout() {
   await logout();
 }
@@ -28,7 +31,7 @@ export default function CustomHeader({user}) {
         <View style={styles.container}>
             <View style={styles.leftContainer}>
                 <TouchableOpacity
-                    onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+                    onPress={toggleDrawer}
                     style={styles.menuButton}
                 >
                     <MaterialIcons name="menu" size={28} color="#000" />

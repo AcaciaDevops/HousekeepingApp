@@ -1,9 +1,9 @@
 // src/navigation/AppDrawer.js
-import React from "react";
+import React, { useState } from "react";
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { View, StyleSheet } from 'react-native';
 import CustomDrawer from '../components/CustomDrawer';
 import CustomHeader from '../components/CustomHeader';
-import AppTabs from "./AppTabs";
 import ProfileScreen from "../features/profile/ProfileScreen";
 import DashboardScreen from "../features/dashboard/DashboardScreen";
 import RoomsStack from "./RoomsStack";
@@ -14,32 +14,42 @@ import { MaterialIcons } from "@expo/vector-icons";
 const Drawer = createDrawerNavigator();
 
 export default function AppDrawer({ user }) {
+    const [isExpanded, setIsExpanded] = useState(true);
+
     return (
+         <View style={styles.container}>
+            {/* Header - Fixed at top */}
+         <CustomHeader user={user} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+            
+            {/* Drawer and Content Container */}
+            <View style={styles.mainContainer}>
         <Drawer.Navigator
             initialRouteName="Home"
-            drawerContent={(props) => <CustomDrawer {...props} user={user} />}
+            drawerContent={(props) => <CustomDrawer {...props} user={user} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />}
             screenOptions={{
+                drawerType: 'permanent', // Make drawer permanent
                 drawerStyle: {
                     backgroundColor: '#ffffff',
-                    width: 280,
+                    width: isExpanded ? 280 : 50, // Dynamic width
                 },
+                 headerShown: false, 
                 headerStyle: {
                     backgroundColor: '#fff',
                 },
-                header: () => <CustomHeader user={user} />, 
+                // header: () => <CustomHeader user={user} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />,
                 headerTintColor: '#000000',
                 headerTitleStyle: {
                     fontWeight: 'bold',
                 },
-                // Drawer item styles
-                drawerActiveTintColor: '#62ce99', // Green text when active/selected
-                drawerInactiveTintColor: '#000000', // Black text when inactive
-                drawerActiveBackgroundColor: '#edf9f3', // Light green background when selected (optional)
-                drawerInactiveBackgroundColor: 'transparent', // Transparent background when not selected
+                drawerActiveTintColor: '#62ce99',
+                drawerInactiveTintColor: '#000000',
+                drawerActiveBackgroundColor: '#edf9f3',
+                drawerInactiveBackgroundColor: 'transparent',
                 drawerLabelStyle: {
                     fontSize: 14,
                     fontWeight: '400',
-                    marginLeft: -16, // Adjust label position
+                    marginLeft: -16,
+                    display: isExpanded ? 'flex' : 'none', // Hide labels when collapsed
                 },
                 drawerItemStyle: {
                     borderRadius: 0,
@@ -110,6 +120,18 @@ export default function AppDrawer({ user }) {
                     drawerLabel: 'Profile',
                 }}
             />
-        </Drawer.Navigator>
+           </Drawer.Navigator>
+            </View>
+        </View>
     );
 }
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    mainContainer: {
+        flex: 1,
+        flexDirection: 'row',
+    },
+});
