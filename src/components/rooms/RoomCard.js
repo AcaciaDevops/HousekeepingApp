@@ -2,18 +2,22 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Menu } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import { useAppTheme } from "../../context/ThemeContext";
+import { useThemedStyles } from "../../utils/useThemedStyles";
 
 export default function RoomCard({ room, onStatusChange }) {
   const navigation = useNavigation();
+  const { tokens } = useAppTheme();
+  const styles = useThemedStyles(createStyles);
   const [visible, setVisible] = useState(false);
 
   // Status colors for UI
   const STATUS_COLORS = {
-    vacant_clean: styles.clean,
-    vacant_dirty: styles.dirty,
-    inspection: styles.inspection,
-    occupied_clean: styles.occupied_clean,
-    occupied_dirty: styles.occupied_dirty,
+    vacant_clean: tokens.status.vacantClean,
+    vacant_dirty: tokens.status.vacantDirty,
+    inspection: tokens.status.inspection,
+    occupied_clean: tokens.status.occupiedClean,
+    occupied_dirty: tokens.status.occupiedDirty,
   };
 
   // Label mapping for display
@@ -27,8 +31,7 @@ export default function RoomCard({ room, onStatusChange }) {
 
   const currentStatus = room.room_status;
   const currentStatusLabel = STATUS_LABELS[currentStatus] || "Unknown";
-  const currentStatusStyle =
-    STATUS_COLORS[currentStatus] || styles.defaultStatus;
+  const currentStatusColor = STATUS_COLORS[currentStatus] || tokens.status.inspection;
 
   const statusOptions = Object.keys(STATUS_LABELS);
 
@@ -42,13 +45,12 @@ export default function RoomCard({ room, onStatusChange }) {
 
   return (
     <Pressable
-      onPress={() => navigation.navigate("RoomDetailsScreen", { room , onStatusChange})}
+      onPress={() => navigation.navigate("RoomDetailsScreen", { room, onStatusChange })}
       style={({ pressed }) => [
         styles.card,
-        pressed && styles.pressedCard, // pressed effect
+        pressed && styles.pressedCard,
       ]}
     >
-        <Text style={styles.roomNumber}>Room ID{room.room_id}</Text>
       <Text style={styles.roomNumber}>Room {room.room_number}</Text>
       <Text style={styles.roomName}>{room.room_name}</Text>
       <Text style={styles.floor}>Floor: {room.room_floor_id}</Text>
@@ -59,7 +61,7 @@ export default function RoomCard({ room, onStatusChange }) {
         onDismiss={() => setVisible(false)}
         anchor={
           <Pressable onPress={() => setVisible(true)}>
-            <View style={[styles.statusTag, currentStatusStyle]}>
+            <View style={[styles.statusTag, { backgroundColor: currentStatusColor }]}>
               <Text style={styles.statusText}>{currentStatusLabel}</Text>
             </View>
           </Pressable>
@@ -81,54 +83,54 @@ export default function RoomCard({ room, onStatusChange }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  pressedCard: {
-    opacity: 0.6, // pressed effect
-  },
-  roomNumber: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  roomName: {
-    fontSize: 16,
-    marginTop: 6,
-    color: "#333",
-  },
-  floor: {
-    fontSize: 14,
-    marginTop: 4,
-    color: "#666",
-  },
-  type: {
-    fontSize: 15,
-    marginTop: 4,
-    color: "gray",
-  },
-  statusTag: {
-    alignSelf: "flex-start",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  statusText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  clean: { backgroundColor: "#4CAF50" },
-  dirty: { backgroundColor: "#FF9800" },
-  inspection: { backgroundColor: "#f321c6ff" },
-  occupied_clean: { backgroundColor: "#2196F3" },
-  occupied_dirty: { backgroundColor: "#F44336" },
-  defaultStatus: { backgroundColor: "#607D8B" },
-});
+const createStyles = (tokens) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: tokens.surface,
+      padding: 16,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: tokens.border,
+      shadowColor: "#000",
+      shadowOpacity: 0.05,
+      shadowRadius: 6,
+      elevation: 2,
+    },
+    pressedCard: {
+      opacity: 0.7,
+    },
+    roomNumber: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: tokens.heading,
+    },
+    roomName: {
+      fontSize: 16,
+      marginTop: 6,
+      color: tokens.text,
+      fontWeight: "600",
+    },
+    floor: {
+      fontSize: 14,
+      marginTop: 4,
+      color: tokens.text,
+    },
+    type: {
+      fontSize: 14,
+      marginTop: 4,
+      color: tokens.info,
+    },
+    statusTag: {
+      alignSelf: "flex-start",
+      paddingVertical: 8,
+      paddingHorizontal: 14,
+      borderRadius: 8,
+      marginTop: 12,
+    },
+    statusText: {
+      color: "#fff",
+      fontWeight: "600",
+      fontSize: 13,
+    },
+  });

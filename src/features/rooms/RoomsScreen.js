@@ -3,12 +3,14 @@ import { View, FlatList, StyleSheet, ActivityIndicator } from "react-native";
 import RoomCard from "../../components/rooms/RoomCard";
 import { fetchRooms, updateRoomStatus } from "../../api/RoomApi";
 import { useAppTheme } from "../../context/ThemeContext";
+import { useThemedStyles } from "../../utils/useThemedStyles";
 import { ThemedScreen } from "../../components/ui";
 
 export default function RoomsScreen() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const { tokens } = useAppTheme();
+  const styles = useThemedStyles(createStyles);
 
   useEffect(() => {
     async function loadRooms() {
@@ -67,14 +69,17 @@ export default function RoomsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const createStyles = (tokens) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: tokens.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: tokens.background,
+    },
+  });
