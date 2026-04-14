@@ -15,13 +15,16 @@ import { useNavigation, DrawerActions } from '@react-navigation/native';
 import useAuth from '../features/auth/hooks/useAuth';
 import { useAppTheme } from '../context/ThemeContext';
 
-export default function CustomHeader({ user }) {
-    const { logout } = useAuth();
+export default function CustomHeader({user, isExpanded, setIsExpanded, ...props }) {
+     const {  logout } = useAuth();
     const navigation = useNavigation();
     const [dropdownVisible, setDropdownVisible] = useState(false);
-    const { tokens } = useAppTheme();
+  const { tokens } = useAppTheme();
     const styles = useMemo(() => createStyles(tokens), [tokens]);
-
+  const toggleDrawer = () => {
+        setIsExpanded(!isExpanded);
+    };
+    
     async function handleLogout() {
         setDropdownVisible(false);
         await logout();
@@ -32,7 +35,7 @@ export default function CustomHeader({ user }) {
             {/* Left: Hamburger Menu */}
             <View style={styles.leftContainer}>
                 <TouchableOpacity
-                    onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+                    onPress={toggleDrawer}
                     style={styles.iconButton}
                 >
                     <MaterialIcons name="menu" size={28} color={tokens.icon} />

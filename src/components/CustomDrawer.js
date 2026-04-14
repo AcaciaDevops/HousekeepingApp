@@ -81,7 +81,8 @@ const buildStyles = (tokens) =>
         },
     });
 
-export default function CustomDrawer({ user, ...props }) {
+
+export default function CustomDrawer({ user, isExpanded, setIsExpanded, ...props }) {
   const { logout } = useAuth();
   const { tokens, mode, toggleTheme } = useAppTheme();
   const styles = useMemo(() => buildStyles(tokens), [tokens]);
@@ -89,25 +90,32 @@ export default function CustomDrawer({ user, ...props }) {
   async function handleLogout() {
     await logout();
   }
+  
+  const toggleDrawer = () => {
+        setIsExpanded(!isExpanded);
+    };
 
   return (
       <View style={styles.container}>
           <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContent}>
               <View style={styles.drawerHeader}>
+                <View style={styles.logoContainer}>
                   <View style={styles.logoWrapper}>
                       <Image
                           source={logo}
                           style={styles.logoImage}
                           resizeMode="contain"
                       />
+                      {isExpanded && (
                       <Image
                           source={acaciaDark}
                           style={styles.logoImage}
                           resizeMode="contain"
                       />
+                      )}
                   </View>
+                </View>
               </View>
-
               <View style={styles.drawerItems}>
                   <DrawerItemList {...props} />
               </View>
@@ -129,7 +137,9 @@ export default function CustomDrawer({ user, ...props }) {
                   onPress={handleLogout}
               >
                   <MaterialIcons name="logout" size={20} color={tokens.icon} />
-                  <Text style={styles.footerButtonText}>Logout</Text>
+                  {isExpanded && (
+                        <Text style={styles.footerButtonText}>Logout</Text>
+                    )}
               </TouchableOpacity>
           </View>
       </View>
