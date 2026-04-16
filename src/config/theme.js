@@ -1,6 +1,100 @@
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import { DarkTheme as NavigationDarkTheme, DefaultTheme as NavigationDefaultTheme } from '@react-navigation/native';
 
+const fonts = {
+  regular: {
+    fontFamily: 'Mluvka-Regular',
+    fontWeight: 'normal',
+  },
+  medium: {
+    fontFamily: 'Mluvka-Regular',
+    fontWeight: '500',
+  },
+  bold: {
+    fontFamily: 'Mluvka-Bold',
+    fontWeight: 'bold',
+  },
+  heavy: {
+    fontFamily: 'Mluvka-Bold',
+    fontWeight: '900',
+  },
+  displayLarge: {
+    fontFamily: 'Mluvka-Bold',
+    fontSize: 57,
+    fontWeight: '700',
+  },
+  displayMedium: {
+    fontFamily: 'Mluvka-Bold',
+    fontSize: 45,
+    fontWeight: '700',
+  },
+  displaySmall: {
+    fontFamily: 'Mluvka-Bold',
+    fontSize: 36,
+    fontWeight: '700',
+  },
+  headlineLarge: {
+    fontFamily: 'Mluvka-Bold',
+    fontSize: 32,
+    fontWeight: '700',
+  },
+  headlineMedium: {
+    fontFamily: 'Mluvka-Bold',
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  headlineSmall: {
+    fontFamily: 'Mluvka-Bold',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  titleLarge: {
+    fontFamily: 'Mluvka-Bold',
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  titleMedium: {
+    fontFamily: 'Mluvka-Regular',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  titleSmall: {
+    fontFamily: 'Mluvka-Regular',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  bodyLarge: {
+    fontFamily: 'Mluvka-Regular',
+    fontSize: 16,
+    fontWeight: '400',
+  },
+  bodyMedium: {
+    fontFamily: 'Mluvka-Regular',
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  bodySmall: {
+    fontFamily: 'Mluvka-Regular',
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  labelLarge: {
+    fontFamily: 'Mluvka-Regular',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  labelMedium: {
+    fontFamily: 'Mluvka-Regular',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  labelSmall: {
+    fontFamily: 'Mluvka-Regular',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+};
+
 const palette = {
   acaciaCottonBall: '#f3f7fd',
   acaciaCarolinaParakeet: '#d6e07e',
@@ -33,7 +127,7 @@ const baseTokens = {
   border: palette.acaciaEnamelledDragon,
   heading: palette.acaciaZucchini,
   button: palette.acaciaZucchini,
-  buttonText: palette.acaciaCottonBall,
+  buttonText: palette.acaciaSatinDeepBlack,
   buttonHover: palette.acaciaSatinDeepBlack,
   buttonDisabled: '#888',
   block: palette.acaciaCarolinaParakeet,
@@ -48,6 +142,7 @@ const baseTokens = {
   toggleTrack: palette.acaciaEnamelledDragon,
   status: statusPalette,
   taskStatus: taskPalette,
+  fonts: fonts,
 };
 
 const lightTokens = {
@@ -74,6 +169,7 @@ const darkTokens = {
 
 const lightPaperTheme = {
   ...MD3LightTheme,
+  fonts: fonts,
   colors: {
     ...MD3LightTheme.colors,
     primary: palette.acaciaZucchini,
@@ -97,6 +193,7 @@ const lightPaperTheme = {
 
 const darkPaperTheme = {
   ...MD3DarkTheme,
+  fonts: fonts,
   colors: {
     ...MD3DarkTheme.colors,
     primary: palette.acaciaCarolinaParakeet,
@@ -120,6 +217,7 @@ const darkPaperTheme = {
 
 const lightNavigationTheme = {
   ...NavigationDefaultTheme,
+  fonts: fonts,
   colors: {
     ...NavigationDefaultTheme.colors,
     primary: palette.acaciaZucchini,
@@ -133,6 +231,7 @@ const lightNavigationTheme = {
 
 const darkNavigationTheme = {
   ...NavigationDarkTheme,
+  fonts: fonts,
   colors: {
     ...NavigationDarkTheme.colors,
     primary: palette.acaciaCarolinaParakeet,
@@ -148,6 +247,8 @@ export const ThemeModes = {
   LIGHT: 'light',
   DARK: 'dark',
 };
+
+export const appFonts = fonts;
 
 export const appThemes = {
   [ThemeModes.LIGHT]: {
