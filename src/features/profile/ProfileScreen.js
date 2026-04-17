@@ -35,7 +35,7 @@ const ProfileScreen = () => {
   const styles = useThemedStyles(createProfileStyles);
   const [profileData, setProfileData] = useState({
     user_first_name: '',
-    user_last_name:'',
+    user_last_name: '',
     user_email: '',
     user_contact_number: '',
     user_role_name: '',
@@ -52,15 +52,14 @@ const ProfileScreen = () => {
       if (savedProfile) {
         setProfileData(JSON.parse(savedProfile));
       } else if (user) {
-        console.log("user::123",user)
+        console.log("user::123", user);
         setProfileData({
-          name: user.name || '',
-          email: user.user_email || '',
-          phone: user.phone || '+1 234 567 8900',
-          position: user.user_role_name == 'MaintenanceManager' ? 'Maintenance Manager' : 'Maintenance Staff',
-          department: 'Engineering & Maintenance',
-          joinDate: 'January 2024',
-          avatar: null,
+          user_first_name: user.user_first_name || user.name || '',
+          user_last_name: user.user_last_name || '',
+          user_email: user.user_email || '',
+          user_contact_number: user.user_contact_number || user.phone || '',
+          user_role_name: user.user_role_name || '',
+          user_profile_image_path: user.user_profile_image_path || null,
         });
       }
     } catch (error) {
@@ -106,21 +105,33 @@ const roleLabelMap = {
       {/* Header with Background */}
       <View style={styles.header}>
         <View style={styles.headerOverlay} />
-       
       </View>
 
       {/* Profile Image Section */}
       <View style={styles.profileImageContainer}>
-        <TouchableOpacity onPress={handleImagePick} disabled={!isEditing}>
+        <TouchableOpacity
+          onPress={handleImagePick}
+          disabled={!isEditing}
+          style={styles.avatarTouchable}
+          activeOpacity={0.7}
+        >
           {profileData.user_profile_image_path ? (
-            <Image source={{ uri: profileData.user_profile_image_path }} style={styles.profileImage} />
-          ) : (
-            <Avatar.Text
-              size={120}
-              label={profileData.user_first_name ? profileData.user_first_name.charAt(0).toUpperCase() : 'U'}
-              style={styles.profileAvatar}
-              labelStyle={styles.avatarLabel}
+            <Image
+              source={{ uri: profileData.user_profile_image_path }}
+              style={styles.profileImage}
+              onError={() => {
+                // Fallback to avatar if image fails to load
+                setProfileData(prev => ({ ...prev, user_profile_image_path: null }));
+              }}
+              resizeMode="cover"
             />
+          ) : (
+            <View style={styles.profileAvatar}>
+              <Text style={styles.avatarLabel}>
+                {profileData.user_first_name ? profileData.user_first_name.charAt(0).toUpperCase() :
+                 profileData.user_email ? profileData.user_email.charAt(0).toUpperCase() : 'U'}
+              </Text>
+            </View>
           )}
           {isEditing && (
             <View style={styles.editImageBadge}>
@@ -128,10 +139,6 @@ const roleLabelMap = {
             </View>
           )}
         </TouchableOpacity>
-          <Text style={styles.userName}>{profileData.user_first_name || 'User Name'}</Text>
-          <Text style={styles.userRole}>
-            {roleLabelMap[profileData?.user_role_name] || "User"}
-          </Text>
       </View>
 
      
@@ -147,17 +154,36 @@ const roleLabelMap = {
             <Icon name="person-outline" size={20} color={tokens.icon} style={styles.infoIcon} />
             {isEditing ? (
               <TextInput
-                label="Full Name"
+                label="First Name"
                 value={profileData.user_first_name}
-                onChangeText={(text) => setProfileData({ ...profileData, name: text })}
+                onChangeText={(text) => setProfileData({ ...profileData, user_first_name: text })}
                 mode="outlined"
                 style={styles.editInput}
                 dense
               />
             ) : (
               <View>
-                <Text style={styles.infoLabel}>Full Name</Text>
+                <Text style={styles.infoLabel}>First Name</Text>
                 <Text style={styles.infoValue}>{profileData.user_first_name || 'Not set'}</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.infoRow}>
+            <Icon name="person-outline" size={20} color={tokens.icon} style={styles.infoIcon} />
+            {isEditing ? (
+              <TextInput
+                label="Last Name"
+                value={profileData.user_last_name}
+                onChangeText={(text) => setProfileData({ ...profileData, user_last_name: text })}
+                mode="outlined"
+                style={styles.editInput}
+                dense
+              />
+            ) : (
+              <View>
+                <Text style={styles.infoLabel}>Last Name</Text>
+                <Text style={styles.infoValue}>{profileData.user_last_name || 'Not set'}</Text>
               </View>
             )}
           </View>
@@ -168,7 +194,7 @@ const roleLabelMap = {
               <TextInput
                 label="Email"
                 value={profileData.user_email}
-                onChangeText={(text) => setProfileData({ ...profileData, email: text })}
+                onChangeText={(text) => setProfileData({ ...profileData, user_email: text })}
                 mode="outlined"
                 style={styles.editInput}
                 keyboardType="email-address"
@@ -177,18 +203,18 @@ const roleLabelMap = {
             ) : (
               <View>
                 <Text style={styles.infoLabel}>Email Address</Text>
-                <Text style={styles.infoValue}>{profileData.user_email}</Text>
+                <Text style={styles.infoValue}>{profileData.user_email || 'Not set'}</Text>
               </View>
             )}
           </View>
-          
+
           <View style={styles.infoRow}>
             <Icon name="call-outline" size={20} color={tokens.icon} style={styles.infoIcon} />
             {isEditing ? (
               <TextInput
                 label="Phone Number"
                 value={profileData.user_contact_number}
-                onChangeText={(text) => setProfileData({ ...profileData, phone: text })}
+                onChangeText={(text) => setProfileData({ ...profileData, user_contact_number: text })}
                 mode="outlined"
                 style={styles.editInput}
                 keyboardType="phone-pad"
@@ -197,27 +223,40 @@ const roleLabelMap = {
             ) : (
               <View>
                 <Text style={styles.infoLabel}>Phone Number</Text>
-                <Text style={styles.infoValue}>{profileData.user_contact_number}</Text>
+                <Text style={styles.infoValue}>{profileData.user_contact_number || 'Not set'}</Text>
               </View>
             )}
           </View>
           
           <View style={styles.infoRow}>
             <Icon name="briefcase-outline" size={20} color={tokens.icon} style={styles.infoIcon} />
-            {isEditing ? (
-              <TextInput
-                label="Position"
-                value={profileData.position}
-                onChangeText={(text) => setProfileData({ ...profileData, position: text })}
+            <View>
+              <Text style={styles.infoLabel}>Position</Text>
+              <Text style={styles.infoValue}>{roleLabelMap[profileData?.user_role_name] || "User"}</Text>
+            </View>
+          </View>
+
+          {/* Edit/Save Button */}
+          <View style={styles.buttonRow}>
+            <Button
+              mode="contained"
+              onPress={() => setIsEditing(!isEditing)}
+              style={styles.editButton}
+              buttonColor={isEditing ? tokens.success : tokens.button}
+              textColor={tokens.buttonText}
+            >
+              {isEditing ? 'Save Profile' : 'Edit Profile'}
+            </Button>
+            {isEditing && (
+              <Button
                 mode="outlined"
-                style={styles.editInput}
-                dense
-              />
-            ) : (
-              <View>
-                <Text style={styles.infoLabel}>Position</Text>
-                <Text style={styles.infoValue}>{roleLabelMap[profileData?.user_role_name] || "User"}</Text>
-              </View>
+                onPress={() => setIsEditing(false)}
+                style={styles.cancelButton}
+                buttonColor={tokens.surface}
+                textColor={tokens.text}
+              >
+                Cancel
+              </Button>
             )}
           </View>
              
@@ -301,7 +340,7 @@ const createProfileStyles = (tokens) =>
       paddingBottom: 40,
     },
     header: {
-      height: 150,
+      height: 100,
       backgroundColor: tokens.header,
       position: "relative",
     },
@@ -314,22 +353,47 @@ const createProfileStyles = (tokens) =>
       marginTop: -60,
       marginBottom: 20,
     },
+    avatarTouchable: {
+      position: 'relative',
+    },
     profileImage: {
       width: 120,
       height: 120,
       borderRadius: 60,
       borderWidth: 4,
       borderColor: tokens.background,
+      elevation: 5,
+      shadowColor: tokens.text,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      // Web-specific styles for better compatibility
+      objectFit: 'cover',
     },
     profileAvatar: {
-      backgroundColor: tokens.surface,
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: tokens.button,
       borderWidth: 4,
       borderColor: tokens.background,
       elevation: 5,
+      shadowColor: tokens.text,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      // Ensure proper display on web
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     avatarLabel: {
       fontSize: 48,
-      color: tokens.button,
+      color: tokens.buttonText,
+      fontWeight: 'bold',
+      // Web-specific font rendering
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      textAlign: 'center',
+      lineHeight: 48,
     },
     editImageBadge: {
       position: "absolute",
@@ -418,6 +482,23 @@ const createProfileStyles = (tokens) =>
       backgroundColor: tokens.background,
       height: 40,
       color: tokens.text,
+    },
+    buttonRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+      marginBottom: 10,
+    },
+    editButton: {
+      flex: 1,
+      marginRight: 8,
+      borderRadius: 8,
+    },
+    cancelButton: {
+      flex: 1,
+      marginLeft: 8,
+      borderRadius: 8,
+      borderColor: tokens.border,
     },
     settingRow: {
       flexDirection: "row",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, ActivityIndicator, FlatList, StyleSheet } from "react-native";
 import { fetchTasks } from "../../api/TasksApi";
 import TaskItem from "./TaskItem";
@@ -21,7 +21,7 @@ export default function TaskList({ route }) {
     try {
       const res = await fetchTasks(currentTabStatus, user);
       setTasks(res.data || []);
-      setTotalTask(res.total);
+      setTotalTask(res.total || 0);
     } finally {
       setLoading(false);
     }
@@ -30,7 +30,7 @@ export default function TaskList({ route }) {
   useFocusEffect(
     React.useCallback(() => {
       load();
-    }, [currentTabStatus])
+    }, [currentTabStatus, user])
   );
 
   const handleTaskStatusUpdated = (updatedTask) => {
@@ -47,7 +47,7 @@ export default function TaskList({ route }) {
     );
   }
 
-  if (tasks && tasks.length === 0) {
+  if (tasks.length === 0) {
     return (
       <View style={styles.placeholder}>
         <Text style={styles.emptyText}>No tasks found</Text>
@@ -58,14 +58,15 @@ export default function TaskList({ route }) {
   return (
     <>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Total Tasks: {totalTasks}</Text>
+        <View style={styles.headerPill}>
+          <Text style={styles.headerText}>Tasks:</Text>
+          <Text style={styles.headerCount}>{totalTasks}</Text>
+        </View>
       </View>
       <FlatList
         data={tasks}
         keyExtractor={(item) => item.id?.toString()}
-        renderItem={({ item }) => (
-          <TaskItem task={item} onStatusUpdated={handleTaskStatusUpdated} />
-        )}
+        renderItem={({ item }) => <TaskItem task={item} onStatusUpdated={handleTaskStatusUpdated} />}
         contentContainerStyle={styles.list}
       />
     </>
@@ -81,16 +82,34 @@ const createTaskListStyles = (tokens) =>
     },
     emptyText: {
       color: tokens.text,
-      fontSize: 16,
+      fontSize: 15,
+      fontWeight: "600",
     },
     header: {
-      justifyContent: "flex-start",
-      paddingVertical: 8,
+      paddingTop: 8,
       paddingHorizontal: 16,
+      paddingBottom: 4,
+      alignItems: "flex-start",
+    },
+    headerPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      alignSelf: "flex-start",
+      borderRadius: 999,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
     },
     headerText: {
-      color: tokens.heading,
-      fontWeight: "600",
+      color: tokens.button,
+      fontWeight: "700",
+      fontSize: 13,
+      letterSpacing: 0.2,
+    },
+    headerCount: {
+      color: tokens.button,
+      fontWeight: "700",
+      fontSize: 13,
     },
     list: {
       paddingBottom: 24,
