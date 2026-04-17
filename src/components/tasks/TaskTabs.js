@@ -105,7 +105,6 @@ const createTaskTabsStyles = (tokens) =>
       backgroundColor: tokens.blockSecondary,
     },
     pickerContainer: {
-      backgroundColor: tokens.block,
       padding: 16,
       borderBottomWidth: 1,
       borderBottomColor: tokens.border,

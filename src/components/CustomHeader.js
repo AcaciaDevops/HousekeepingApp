@@ -11,20 +11,19 @@ import {
 } from 'react-native';
 import NotificationBell from "../components/notifications/NotificationBell.js";
 import { MaterialIcons } from '@expo/vector-icons';
+import logo from '../assets/acaciaLogo.svg';
+import acaciaDark from '../assets/AcaciaDark.svg';
+import acacia from '../assets/Acacia.svg';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import useAuth from '../features/auth/hooks/useAuth';
 import { useAppTheme } from '../context/ThemeContext';
 
 export default function CustomHeader({user, isExpanded, setIsExpanded, ...props }) {
      const {  logout } = useAuth();
-    const navigation = useNavigation();
     const [dropdownVisible, setDropdownVisible] = useState(false);
-  const { tokens } = useAppTheme();
+  const { tokens, mode } = useAppTheme();
     const styles = useMemo(() => createStyles(tokens), [tokens]);
-  const toggleDrawer = () => {
-        setIsExpanded(!isExpanded);
-    };
-    
+     
     async function handleLogout() {
         setDropdownVisible(false);
         await logout();
@@ -32,15 +31,26 @@ export default function CustomHeader({user, isExpanded, setIsExpanded, ...props 
 
     return (
         <View style={styles.container}>
-            {/* Left: Hamburger Menu */}
-            <View style={styles.leftContainer}>
-                <TouchableOpacity
-                    onPress={toggleDrawer}
-                    style={styles.iconButton}
-                >
-                    <MaterialIcons name="menu" size={28} color={tokens.icon} />
-                </TouchableOpacity>
-            </View>
+            {console.log("mode::",mode)}
+             <View style={styles.logoWrapper}>
+                                 <Image
+                                     source={logo}
+                                     style={styles.logoImage}
+                                     resizeMode="contain"
+                                 />
+                                 {mode == 'light' ?
+                                   <Image
+                                     source={acaciaDark}
+                                     style={styles.acacialogoImage}
+                                     resizeMode="contain"
+                                 /> :  <Image
+                                     source={acacia}
+                                     style={styles.acacialogoImage}
+                                     resizeMode="contain"
+                                 /> 
+                                 }
+                               
+                        </View>
 
             {/* Center: Title */}
             <View style={styles.centerContainer}>
@@ -126,6 +136,17 @@ const createStyles = (tokens) =>
             shadowOpacity: 0.1,
             shadowRadius: 2,
             zIndex: 10,
+        },
+          logoWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+        },
+         acacialogoImage: {
+            width: 70,
+        },
+        logoImage: {
+            width: 25,
         },
         leftContainer: {
             flex: 1,
