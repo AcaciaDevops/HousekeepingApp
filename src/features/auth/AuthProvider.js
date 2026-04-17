@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   // Check for existing token on app start
@@ -25,6 +26,7 @@ export function AuthProvider({ children }) {
         const decoded = decodeToken(token);
         setUser(decoded);
         setIsAuthenticated(true);
+        setIsInitialized(true);
       }
     } catch (error) {
       console.error("Auth check error:", error);
@@ -64,6 +66,7 @@ export function AuthProvider({ children }) {
           if (userResponse.ok) {
             const userData = await userResponse.json();
             await AsyncStorage.setItem('userProfile', JSON.stringify(userData.user));
+             await AsyncStorage.setItem('lastActivePropertyId', 'PROPHOT0001');
             console.log("userData::", userData);
           }
         } catch (profileError) {
@@ -74,6 +77,7 @@ export function AuthProvider({ children }) {
         // Update state ONLY on success
         setUser(decoded);
         setIsAuthenticated(true);
+         setIsInitialized(true);
         setIsLoading(false);
         
         return { success: true, user: decoded };
@@ -145,6 +149,7 @@ export function AuthProvider({ children }) {
       // Clear state - this will trigger unmount of protected screens
       setUser(null);
       setIsAuthenticated(false);
+       setIsInitialized(false);
 
     } catch (error) {
       console.error("Logout error:", error);
@@ -156,6 +161,7 @@ export function AuthProvider({ children }) {
     user,
     isLoading:false,
     isAuthenticated,
+    isInitialized,
     authChecked,
     login,
     logout

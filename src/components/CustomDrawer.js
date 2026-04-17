@@ -25,15 +25,23 @@ const buildStyles = (tokens) =>
             flex: 1,
             backgroundColor: tokens.background,
         },
+        iconButton: {
+            padding: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
         drawerContent: {
             flex: 1,
         },
         drawerHeader: {
             backgroundColor: tokens.block,
-            padding: 20,
+            padding: 5,
             alignItems: 'flex-start',
             borderBottomWidth: 1,
             borderColor: tokens.border,
+        },
+        logoContainer:{
+
         },
         logoWrapper: {
             flexDirection: 'row',
@@ -60,10 +68,7 @@ const buildStyles = (tokens) =>
             color: tokens.text,
             fontWeight: 'bold',
         },
-        logoImage: {
-            width: 40,
-            height: 40,
-        },
+       
         themeToggleContainer: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -83,65 +88,58 @@ const buildStyles = (tokens) =>
 
 
 export default function CustomDrawer({ user, isExpanded, setIsExpanded, ...props }) {
-  const { logout } = useAuth();
-  const { tokens, mode, toggleTheme } = useAppTheme();
-  const styles = useMemo(() => buildStyles(tokens), [tokens]);
+    const { logout } = useAuth();
+    const { tokens, mode, toggleTheme } = useAppTheme();
+    const styles = useMemo(() => buildStyles(tokens), [tokens]);
 
-  async function handleLogout() {
-    await logout();
-  }
-  
-  const toggleDrawer = () => {
+    async function handleLogout() {
+        await logout();
+    }
+
+    const toggleDrawer = () => {
         setIsExpanded(!isExpanded);
     };
 
-  return (
-      <View style={styles.container}>
-          <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContent}>
-              <View style={styles.drawerHeader}>
-                <View style={styles.logoContainer}>
-                  <View style={styles.logoWrapper}>
-                      <Image
-                          source={logo}
-                          style={styles.logoImage}
-                          resizeMode="contain"
-                      />
-                      {isExpanded && (
-                      <Image
-                          source={acaciaDark}
-                          style={styles.logoImage}
-                          resizeMode="contain"
-                      />
-                      )}
-                  </View>
+    return (
+        <View style={styles.container}>
+            <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContent}>
+                <View style={styles.drawerHeader}>
+                    <View style={styles.logoContainer}>
+                        {/* Left: Hamburger Menu */}
+                        <TouchableOpacity
+                            onPress={toggleDrawer}
+                            style={styles.iconButton}
+                        >
+                            <MaterialIcons name="menu" size={28} color={tokens.icon} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-              </View>
-              <View style={styles.drawerItems}>
-                  <DrawerItemList {...props} />
-              </View>
-          </DrawerContentScrollView>
+                <View style={styles.drawerItems}>
+                    <DrawerItemList {...props} />
+                </View>
+            </DrawerContentScrollView>
 
-          <View style={styles.drawerFooter}>
-              <View style={styles.themeToggleContainer}>
-                  <Text style={styles.themeLabel}>Light</Text>
-                  <Switch
-                    value={mode === ThemeModes.DARK}
-                    onValueChange={toggleTheme}
-                    color={tokens.button}
-                    trackColor={{ true: tokens.buttonHover, false: tokens.blockSecondary }}
-                  />
-                  <Text style={styles.themeLabel}>Dark</Text>
-              </View>
-              <TouchableOpacity
-                  style={styles.footerButton}
-                  onPress={handleLogout}
-              >
-                  <MaterialIcons name="logout" size={20} color={tokens.icon} />
-                  {isExpanded && (
+            <View style={styles.drawerFooter}>
+                <View style={styles.themeToggleContainer}>
+                    <Text style={styles.themeLabel}>Light</Text>
+                    <Switch
+                        value={mode === ThemeModes.DARK}
+                        onValueChange={toggleTheme}
+                        color={tokens.button}
+                        trackColor={{ true: tokens.buttonHover, false: tokens.blockSecondary }}
+                    />
+                    <Text style={styles.themeLabel}>Dark</Text>
+                </View>
+                <TouchableOpacity
+                    style={styles.footerButton}
+                    onPress={handleLogout}
+                >
+                    <MaterialIcons name="logout" size={20} color={tokens.icon} />
+                    {isExpanded && (
                         <Text style={styles.footerButtonText}>Logout</Text>
                     )}
-              </TouchableOpacity>
-          </View>
-      </View>
-  );
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
 }
