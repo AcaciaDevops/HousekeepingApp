@@ -27,6 +27,7 @@ export default function ThemedScrollView({
 
 const styles = StyleSheet.create({
   root: {
+    paddingLeft:40,
     flex: 1,
   },
   content: {
