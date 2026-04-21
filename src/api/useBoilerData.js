@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { BOILER_SERVICE_API_URL } from '../config/env';
 
-const DEVICE_API_URL = process.env.EXPO_PUBLIC_APP_API_BOILER_URL || 'YOUR_BOILER_API_URL';
-const DATA_API_URL = process.env.EXPO_PUBLIC_APP_API_BOILER_DATA_URL || 'YOUR_BOILER_DATA_API_URL';
-const LOGS_API_URL = process.env.EXPO_PUBLIC_APP_API_BOILER_LOGS_URL || 'YOUR_BOILER_LOGS_API_URL';
+const DEVICE_API_URL =`${BOILER_SERVICE_API_URL}/boiler`;
+const DATA_API_URL =`${BOILER_SERVICE_API_URL}/boilerData`;
 
 // Helper function for API requests
 const makeRequest = async (url, options = {}) => {

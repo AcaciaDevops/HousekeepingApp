@@ -4,6 +4,7 @@ import { decodeToken } from "../../utils/jwt";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login as apiLogin } from "../../services/AuthService";
 import { AuthContext } from "./AuthContext";
+import { USER_SERVICE_API_URL, AUTH_SERVICE_API_URL } from '../../config/env';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -49,11 +50,11 @@ export function AuthProvider({ children }) {
         
         // Decode token
         const decoded = decodeToken(response.token);
-        
+         const url = `${USER_SERVICE_API_URL}/user/me`;
         // Fetch user profile (optional, don't fail if this doesn't work)
         try {
           const userResponse = await fetch(
-            "http://172.26.64.1:3001/api/user/me",
+            url,
             {
               method: "GET",
               headers: {
@@ -128,8 +129,9 @@ export function AuthProvider({ children }) {
 
       // Optional: call backend logout
       if (token) {
+         const url = `${AUTH_SERVICE_API_URL}/authentication/logout`;
         try {
-          await fetch("http://172.26.64.1:3000/api/authentication/logout", {
+          await fetch(url, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,

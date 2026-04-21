@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { WATER_PUMP_SERVICE_API_URL } from '../config/env';
 
-const DEVICE_API_URL = process.env.EXPO_PUBLIC_APP_API_WATER_PUMP_URL || 'YOUR_WATER_PUMP_API_URL';
-const DATA_API_URL = process.env.EXPO_PUBLIC_APP_API_WATER_PUMP_DATA_URL || 'YOUR_WATER_PUMP_DATA_API_URL';
-const LOGS_API_URL = process.env.EXPO_PUBLIC_APP_API_WATER_PUMP_LOGS_URL || 'YOUR_WATER_PUMP_LOGS_API_URL';
+const DEVICE_API_URL =`${WATER_PUMP_SERVICE_API_URL}/waterpump`;
+const DATA_API_URL =`${WATER_PUMP_SERVICE_API_URL}/waterpumpData`;
 
 // Helper function for API requests
 const makeRequest = async (url, options = {}) => {
