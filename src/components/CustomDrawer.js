@@ -1,23 +1,17 @@
 // src/components/CustomDrawer.js
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import {
-    View,
-    Text,
-    StyleSheet,
-    Image,
-    TouchableOpacity,
-} from 'react-native';
-import {
-    DrawerContentScrollView,
-    DrawerItemList,
-} from '@react-navigation/drawer';
-import { MaterialIcons } from '@expo/vector-icons';
-import logo from '../assets/acaciaLogo.svg';
-import acaciaDark from '../assets/AcaciaDark.svg';
-import useAuth from '../features/auth/hooks/useAuth';
-import { useAppTheme } from '../context/ThemeContext';
-import { ThemeModes } from '../config/theme';
-import { Switch } from 'react-native-paper';
+  DrawerContentScrollView,
+  DrawerItemList,
+} from "@react-navigation/drawer";
+import { MaterialIcons } from "@expo/vector-icons";
+import logo from "../assets/acaciaLogo.svg";
+import acaciaDark from "../assets/AcaciaDark.svg";
+import useAuth from "../features/auth/hooks/useAuth";
+import { useAppTheme } from "../context/ThemeContext";
+import { ThemeModes } from "../config/theme";
+import { Switch } from "react-native-paper";
 
 const buildStyles = (tokens) =>
     StyleSheet.create({
@@ -52,8 +46,6 @@ const buildStyles = (tokens) =>
             flex: 1,
         },
         drawerFooter: {
-            borderTopWidth: 1,
-            borderTopColor: tokens.border,
             padding: 10,
             backgroundColor: tokens.blockSecondary,
         },
@@ -73,7 +65,8 @@ const buildStyles = (tokens) =>
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: 15,
+            marginTop: 5,
+            marginBottom: 10,
             paddingVertical: 10,
             paddingHorizontal: 8,
             borderRadius: 10,
@@ -105,7 +98,6 @@ export default function CustomDrawer({ user, isExpanded, setIsExpanded, ...props
             <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContent}>
                 <View style={styles.drawerHeader}>
                     <View style={styles.logoContainer}>
-                        {/* Left: Hamburger Menu */}
                         <TouchableOpacity
                             onPress={toggleDrawer}
                             style={styles.iconButton}
@@ -120,26 +112,29 @@ export default function CustomDrawer({ user, isExpanded, setIsExpanded, ...props
             </DrawerContentScrollView>
 
             <View style={styles.drawerFooter}>
-                <View style={styles.themeToggleContainer}>
-                    <Text style={styles.themeLabel}>Light</Text>
-                    <Switch
-                        value={mode === ThemeModes.DARK}
-                        onValueChange={toggleTheme}
-                        color={tokens.button}
-                        trackColor={{ true: tokens.buttonHover, false: tokens.blockSecondary }}
-                    />
-                    <Text style={styles.themeLabel}>Dark</Text>
-                </View>
-                <TouchableOpacity
-                    style={styles.footerButton}
-                    onPress={handleLogout}
-                >
-                    <MaterialIcons name="logout" size={20} color={tokens.icon} />
-                    {isExpanded && (
-                        <Text style={styles.footerButtonText}>Logout</Text>
-                    )}
-                </TouchableOpacity>
-            </View>
+              {isExpanded && (
+                  <View style={styles.themeToggleContainer}>
+                      <Text style={styles.themeLabel}>Light</Text>
+                      <Switch
+                          value={mode === ThemeModes.DARK}
+                          onValueChange={toggleTheme}
+                          color={tokens.button}
+                          trackColor={{ true: tokens.buttonHover, false: tokens.blockSecondary }}
+                      />
+                      <Text style={styles.themeLabel}>Dark</Text>
+                  </View>
+              )}
+
+              <TouchableOpacity
+                  style={styles.footerButton}
+                  onPress={handleLogout}
+              >
+                  <MaterialIcons name="logout" size={20} color={tokens.icon} />
+                  {isExpanded && (
+                      <Text style={styles.footerButtonText}>Logout</Text>
+                  )}
+              </TouchableOpacity>
+          </View>
         </View>
     );
 }

@@ -71,7 +71,7 @@ export default function StaffScreen() {
   }
 
   const renderStaffCard = ({ item }) => {
-    const statusColor = item.status === "Active" ? tokens.button : tokens.info;
+    const statusColor = item.status === "Active" ? tokens.success : tokens.warning;
 
     return (
       <View style={styles.card}>
@@ -80,13 +80,26 @@ export default function StaffScreen() {
           <Text style={[styles.status, { color: statusColor }]}>{item.status}</Text>
         </View>
 
-        <Text style={styles.info}>{item.role} • Shift: {item.shift}</Text>
-        <Text style={styles.info}>Floor: {item.floor || "N/A"}</Text>
-        <Text style={styles.rooms}>Rooms: {item.rooms || "None assigned"}</Text>
+        <View style={styles.infoRow}>
+          <Text style={styles.info}>{item.role}</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Text style={styles.info}>Shift: {item.shift}</Text>
+        </View>
+        
+        <Text style={styles.floorText}>Floor: {item.floor || "N/A"}</Text>
+        <Text style={styles.roomsText}>Rooms: {item.rooms || "None assigned"}</Text>
 
         <View style={styles.taskRow}>
-          <Text style={styles.task}>✔ {item.completed} Completed</Text>
-          <Text style={styles.task}>⏳ {item.pending} Pending</Text>
+          <View style={styles.taskItem}>
+            <Text style={[styles.taskIcon, { color: tokens.success }]}>✔</Text>
+            <Text style={styles.taskText}>{item.completed} Completed</Text>
+          </View>
+          <View style={styles.taskItem}>
+            <Text style={[styles.taskIcon, { color: tokens.warning }]}>⏳</Text>
+            <Text style={styles.taskText}>{item.pending} Pending</Text>
+          </View>
         </View>
 
         <View style={styles.actions}>
@@ -94,7 +107,7 @@ export default function StaffScreen() {
             style={styles.button} 
             onPress={() => navigation.navigate("StaffDetails", { staffInfo: item })}
           >
-            <Text style={styles.buttonText}>View</Text>
+            <Text style={styles.buttonText}>View Details</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -172,35 +185,172 @@ export default function StaffScreen() {
 
 const createStaffStyles = (tokens) => StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: tokens.background },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 12, color: tokens.heading },
+  title: { 
+    fontSize: tokens.fonts.titleLarge.fontSize, 
+    fontWeight: tokens.fonts.titleLarge.fontWeight,
+    fontFamily: tokens.fonts.titleLarge.fontFamily,
+    marginBottom: 16, 
+    color: tokens.heading,
+    textAlign: 'center'
+  },
   card: { 
     backgroundColor: tokens.surface, 
-    borderRadius: 12, padding: 16, marginBottom: 12, 
-    borderWidth: 1, borderColor: tokens.border, elevation: 2 
+    borderRadius: 12, 
+    padding: 16, 
+    marginBottom: 12, 
+    borderWidth: 1, 
+    borderColor: tokens.border, 
+    elevation: 2,
+    shadowColor: tokens.text,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2
   },
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
-  name: { fontSize: 16, fontWeight: "bold", color: tokens.text },
-  status: { fontWeight: "600" },
-  info: { color: tokens.text, marginBottom: 2 },
-  rooms: { marginTop: 6, fontWeight: "500", color: tokens.text },
+  header: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center",
+    marginBottom: 8 
+  },
+  name: { 
+    fontSize: tokens.fonts.titleMedium.fontSize, 
+    fontWeight: tokens.fonts.titleMedium.fontWeight,
+    fontFamily: tokens.fonts.titleMedium.fontFamily,
+    color: tokens.text 
+  },
+  status: { 
+    fontSize: tokens.fonts.labelMedium.fontSize,
+    fontWeight: tokens.fonts.labelMedium.fontWeight,
+    fontFamily: tokens.fonts.labelMedium.fontFamily,
+    textTransform: 'uppercase'
+  },
+  infoRow: { 
+    flexDirection: "row", 
+    alignItems: "center",
+    marginBottom: 6 
+  },
+  info: { 
+    fontSize: tokens.fonts.bodyMedium.fontSize,
+    fontFamily: tokens.fonts.bodyMedium.fontFamily,
+    color: tokens.text,
+    marginRight: 4
+  },
+  floorText: { 
+    fontSize: tokens.fonts.bodyMedium.fontSize,
+    fontFamily: tokens.fonts.bodyMedium.fontFamily,
+    color: tokens.text,
+    marginBottom: 4,
+    fontWeight: '500'
+  },
+  roomsText: { 
+    fontSize: tokens.fonts.bodyMedium.fontSize,
+    fontFamily: tokens.fonts.bodyMedium.fontFamily,
+    color: tokens.text,
+    marginBottom: 8,
+    fontWeight: '500'
+  },
+  taskRow: { 
+    flexDirection: "row", 
+    justifyContent: "space-between",
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: tokens.border
+  },
+  taskItem: { 
+    flexDirection: "row", 
+    alignItems: "center",
+    flex: 1
+  },
+  taskIcon: { 
+    fontSize: 16, 
+    marginRight: 4 
+  },
+  taskText: { 
+    fontSize: tokens.fonts.bodySmall.fontSize,
+    fontFamily: tokens.fonts.bodySmall.fontFamily,
+    color: tokens.text,
+    fontWeight: '500'
+  },
   searchRow: { 
-    flexDirection: "row", alignItems: "center", backgroundColor: tokens.surface, 
-    borderRadius: 8, borderWidth: 1, borderColor: tokens.border, 
-    paddingHorizontal: 10, marginBottom: 10 
+    flexDirection: "row", 
+    alignItems: "center", 
+    backgroundColor: tokens.surface, 
+    borderRadius: 8, 
+    borderWidth: 1, 
+    borderColor: tokens.border, 
+    paddingHorizontal: 12, 
+    marginBottom: 12,
+    minHeight: 44
   },
-  search: { flex: 1, paddingVertical: 8, color: tokens.text },
-  clear: { fontSize: 18, color: tokens.text },
+  search: { 
+    flex: 1, 
+    paddingVertical: 10, 
+    color: tokens.text,
+    fontSize: tokens.fonts.bodyMedium.fontSize,
+    fontFamily: tokens.fonts.bodyMedium.fontFamily
+  },
+  clear: { 
+    fontSize: 18, 
+    color: tokens.textSecondary,
+    padding: 4
+  },
   filterBtn: { 
-    backgroundColor: tokens.surface, padding: 10, borderRadius: 8, 
-    borderWidth: 1, borderColor: tokens.border, marginBottom: 12 
+    backgroundColor: tokens.surface, 
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8, 
+    borderWidth: 1, 
+    borderColor: tokens.border, 
+    marginBottom: 12,
+    alignSelf: 'flex-start'
   },
-  filterText: { fontWeight: "600", color: tokens.text },
-  empty: { textAlign: "center", marginTop: 40, color: tokens.text, fontSize: 16 },
-  taskRow: { flexDirection: "row", marginTop: 8 },
-  task: { marginRight: 16, fontSize: 13, color: tokens.text },
-  actions: { flexDirection: "row", marginTop: 12, justifyContent: "space-between" },
-  button: { borderWidth: 1, borderColor: tokens.button, borderRadius: 6, paddingVertical: 6, paddingHorizontal: 14 },
-  buttonText: { color: tokens.button, fontWeight: "600" },
-  buttonPrimary: { backgroundColor: tokens.button, borderRadius: 6, paddingVertical: 6, paddingHorizontal: 14 },
-  buttonPrimaryText: { color: tokens.buttonText, fontWeight: "600" },
+  filterText: { 
+    fontSize: tokens.fonts.labelMedium.fontSize,
+    fontFamily: tokens.fonts.labelMedium.fontFamily,
+    fontWeight: tokens.fonts.labelMedium.fontWeight,
+    color: tokens.text 
+  },
+  empty: { 
+    textAlign: "center", 
+    marginTop: 40, 
+    color: tokens.textSecondary, 
+    fontSize: tokens.fonts.bodyLarge.fontSize,
+    fontFamily: tokens.fonts.bodyLarge.fontFamily
+  },
+  actions: { 
+    flexDirection: "row", 
+    marginTop: 12, 
+    justifyContent: "space-between",
+    gap: 8
+  },
+  button: { 
+    borderWidth: 1, 
+    borderColor: tokens.button, 
+    borderRadius: 6, 
+    paddingVertical: 8, 
+    paddingHorizontal: 16,
+    flex: 1,
+    alignItems: 'center'
+  },
+  buttonText: { 
+    color: tokens.button, 
+    fontSize: tokens.fonts.labelMedium.fontSize,
+    fontFamily: tokens.fonts.labelMedium.fontFamily,
+    fontWeight: tokens.fonts.labelMedium.fontWeight
+  },
+  buttonPrimary: { 
+    backgroundColor: tokens.button, 
+    borderRadius: 6, 
+    paddingVertical: 8, 
+    paddingHorizontal: 16,
+    flex: 1,
+    alignItems: 'center'
+  },
+  buttonPrimaryText: { 
+    color: tokens.buttonText, 
+    fontSize: tokens.fonts.labelMedium.fontSize,
+    fontFamily: tokens.fonts.labelMedium.fontFamily,
+    fontWeight: tokens.fonts.labelMedium.fontWeight
+  },
 });
