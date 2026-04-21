@@ -5,12 +5,13 @@ import { usePlantRoomData } from '../../hooks/DevicesAndAppliances/usePlantRoomD
 import { useActivePropertyContext } from '../../hooks/contexts/ActivePropertyContext';
 import SchematicBuilder from '../../components/plantroom/SchematicBuilder';
 import SchematicLibrary from '../../components/plantroom/SchematicLibrary';
+import { NativeSchematicDragProvider } from '../../components/plantroom/NativeSchematicDragContext';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 export default function PlantRoomHeating() {
   const plantRoomData = usePlantRoomData();
-    const { activeProperty } = useActivePropertyContext();
+  const { activeProperty } = useActivePropertyContext();
   const propertyId = activeProperty?.property_id;
   const [isDesignMode, setIsDesignMode] = useState(false);
   const theme = useTheme();
@@ -49,29 +50,31 @@ export default function PlantRoomHeating() {
       </View>
 
       {/* Content Section */}
-      <View style={styles.contentContainer}>
-        <View style={[
-          styles.schematicContainer,
-          isDesignMode && styles.schematicContainerWithLibrary
-        ]}>
-          <Card style={styles.card} contentStyle={styles.cardContent}>
-            <SchematicBuilder 
-              propertyId={propertyId} 
-              graphicType="heating" 
-              readOnly={!isDesignMode} 
-              {...plantRoomData} 
-            />
-          </Card>
-        </View>
-
-        {isDesignMode && (
-          <View style={styles.libraryContainer}>
+      <NativeSchematicDragProvider>
+        <View style={styles.contentContainer}>
+          <View style={[
+            styles.schematicContainer,
+            isDesignMode && styles.schematicContainerWithLibrary
+          ]}>
             <Card style={styles.card} contentStyle={styles.cardContent}>
-              <SchematicLibrary />
+              <SchematicBuilder 
+                propertyId={propertyId} 
+                graphicType="heating" 
+                readOnly={!isDesignMode} 
+                {...plantRoomData} 
+              />
             </Card>
           </View>
-        )}
-      </View>
+
+          {isDesignMode && (
+            <View style={styles.libraryContainer}>
+              <Card style={styles.card} contentStyle={styles.cardContent}>
+                <SchematicLibrary />
+              </Card>
+            </View>
+          )}
+        </View>
+      </NativeSchematicDragProvider>
     </View>
   );
 }
@@ -80,7 +83,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   noPropertyContainer: {
     flex: 1,
@@ -130,136 +132,3 @@ const styles = StyleSheet.create({
     padding: 0,
   },
 });
-
-// Alternative version with ScrollView support if content might overflow:
-/*
-export default function PlantRoomHeating() {
-  const plantRoomData = usePlantRoomData();
-  const { activeProperty } = useActivePropertyContext();
-  const propertyId = activeProperty?.property_id;
-  const [isDesignMode, setIsDesignMode] = useState(false);
-  const theme = useTheme();
-
-  if (!propertyId) {
-    return (
-      <View style={styles.noPropertyContainer}>
-        <Text variant="bodyLarge">
-          Please select a property.
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
-      <View style={styles.container}>
-        {/* Header Section *\/}
-        <View style={styles.header}>
-          <View style={styles.breadcrumbsContainer}>
-            <Text variant="headlineMedium" style={styles.heading}>
-              Plant Room - Heating
-            </Text>
-          </View>
-          
-          <View style={styles.buttonContainer}>
-            <Button
-              mode={isDesignMode ? 'contained' : 'outlined'}
-              onPress={() => setIsDesignMode(!isDesignMode)}
-              icon={isDesignMode ? 'eye' : 'pencil'}
-              buttonColor={isDesignMode ? theme.colors.primary : undefined}
-            >
-              {isDesignMode ? 'Exit Design Mode' : 'Edit Schematic'}
-            </Button>
-          </View>
-        </View>
-
-        {/* Content Section *\/}
-        <View style={styles.contentContainer}>
-          <View style={[
-            styles.schematicContainer,
-            isDesignMode && styles.schematicContainerWithLibrary
-          ]}>
-            <Card style={[styles.card, { height: screenHeight * 0.8 }]} contentStyle={styles.cardContent}>
-              <SchematicBuilder 
-                propertyId={propertyId} 
-                graphicType="heating" 
-                readOnly={!isDesignMode} 
-                {...plantRoomData} 
-              />
-            </Card>
-          </View>
-
-          {isDesignMode && (
-            <View style={styles.libraryContainer}>
-              <Card style={[styles.card, { height: screenHeight * 0.8 }]} contentStyle={styles.cardContent}>
-                <SchematicLibrary />
-              </Card>
-            </View>
-          )}
-        </View>
-      </View>
-    </ScrollView>
-  );
-}
-
-const styles = StyleSheet.create({
-  scrollContainer: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  scrollContentContainer: {
-    flexGrow: 1,
-  },
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  noPropertyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-    flexWrap: 'wrap',
-  },
-  breadcrumbsContainer: {
-    flex: 1,
-    marginBottom: 8,
-  },
-  heading: {
-    fontWeight: 'bold',
-  },
-  buttonContainer: {
-    marginBottom: 8,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    marginTop: 8,
-    flex: 1,
-  },
-  schematicContainer: {
-    flex: 1,
-  },
-  schematicContainerWithLibrary: {
-    flex: 0.75,
-    marginRight: 8,
-  },
-  libraryContainer: {
-    flex: 0.25,
-    marginLeft: 8,
-  },
-  card: {
-    flex: 1,
-    elevation: 2,
-  },
-  cardContent: {
-    flex: 1,
-    padding: 0,
-  },
-});
-*/

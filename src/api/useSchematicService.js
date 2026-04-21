@@ -8,17 +8,35 @@ import { Platform } from 'react-native';
 // Option 2: Using a config file approach (fallback)
 const API_URL = process.env.EXPO_PUBLIC_APP_API_GRAPHICS_SERVICE_URL || '';
 
+const normalizeGraphicsData = (flowData) => {
+  if (!flowData) return flowData;
+
+  if (
+    typeof flowData === 'object' &&
+    !Array.isArray(flowData) &&
+    flowData.graphics_data &&
+    !flowData.nodes &&
+    !flowData.edges
+  ) {
+    return flowData.graphics_data;
+  }
+
+  return flowData;
+};
+
 // Option 3: For production, you can also get from Constants (Expo)
 // import Constants from 'expo-constants';
 // const API_URL = Constants.expoConfig?.extra?.API_GRAPHICS_SERVICE_URL || '';
 
 export const saveSchematic = async (propertyId, graphicType, flowData) => {
   try {
+    const graphicsData = normalizeGraphicsData(flowData);
+
     // ✅ Use API_URL in the request path
     const response = await axios.post(`${API_URL}`, {
       property_id: propertyId,
       graphic_type: graphicType,
-      graphics_data: flowData
+      graphics_data: graphicsData
     });
     return response.data;
   } catch (error) {
