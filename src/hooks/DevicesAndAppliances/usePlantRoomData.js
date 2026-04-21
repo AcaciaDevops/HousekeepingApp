@@ -8,7 +8,13 @@ import useFlowMeterData from '../../api/useFlowMeterData.js';
 
 export function usePlantRoomData() {
   const { activeProperty } = useActivePropertyContext();
-  const { availableRooms } = [];
+  const availableRooms = Array.isArray(activeProperty?.availableRooms)
+    ? activeProperty.availableRooms
+    : Array.isArray(activeProperty?.rooms)
+      ? activeProperty.rooms
+      : Array.isArray(activeProperty?.property_rooms)
+        ? activeProperty.property_rooms
+        : [];
 
   const { boilers: realBoilers = [], fetchBoilers, toggleBoilerStatus } = useBoilerData() || {};
   const { waterPumps: realWaterPumps = [], fetchWaterPumps, toggleWaterPumpStatus } = useWaterPumpData() || {};
@@ -29,18 +35,22 @@ export function usePlantRoomData() {
   }, []);
 
   const realData = useMemo(() => {
-    const roomIds = availableRooms ? availableRooms.map((r) => r.room_id) : [];
+    const roomIds = Array.isArray(availableRooms) && availableRooms.length
+      ? availableRooms.map((r) => r.room_id)
+      : null;
 
     const safeBoilers = realBoilers || [];
     const safeWaterPumps = realWaterPumps || [];
     const safeSensors = realSensors || [];
     const safeFlowMeters = realFlowMeters || [];
 
-    const roomSensors = safeSensors.filter((s) => roomIds.includes(s.sensor_room_id));
+    const roomSensors = roomIds
+      ? safeSensors.filter((s) => roomIds.includes(s.sensor_room_id))
+      : safeSensors;
 
     return {
       boilerList: safeBoilers
-        .filter((b) => roomIds.includes(b.boiler_room_id))
+        .filter((b) => !roomIds || roomIds.includes(b.boiler_room_id))
         .map((b) => ({
           id: b.boiler_id,
           status: b.boiler_status,
@@ -50,7 +60,7 @@ export function usePlantRoomData() {
         })),
 
       waterPumpList: safeWaterPumps
-        .filter((wp) => roomIds.includes(wp.water_pump_room_id))
+        .filter((wp) => !roomIds || roomIds.includes(wp.water_pump_room_id))
         .map((wp) => ({
           id: wp.water_pump_id,
           status: wp.water_pump_status,

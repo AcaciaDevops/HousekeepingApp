@@ -12,8 +12,8 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from 'react-native-svg';
+import { appFonts } from '../../config/theme';
 
-// Helper component for SVG wrapper
 const SvgWrapper = ({ children, viewBox, color, width, height, strokeWidth = 0.5 }) => {
   const theme = useTheme();
   return (
@@ -32,10 +32,27 @@ const SvgWrapper = ({ children, viewBox, color, width, height, strokeWidth = 0.5
   );
 };
 
-// Handle component for connection points (simplified for React Native)
+const LabelBubble = ({ children, compact = false }) => {
+  const theme = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.labelBubble,
+        {
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.outline || theme.colors.backdrop || '#e0e0e0',
+          paddingHorizontal: compact ? 3 : 4,
+          paddingVertical: compact ? 1 : 2,
+        },
+      ]}
+    >
+      {children}
+    </View>
+  );
+};
+
 const Handle = ({ position, id, style }) => {
-  // In React Native, handles are touch targets for connections
-  // This is a simplified version - you'll need to implement actual connection logic
   return (
     <View
       style={[
@@ -131,14 +148,18 @@ export const BoilerNode = ({ id, data }) => {
       {/* Brand */}
       {data.details?.brand && (
         <View style={styles.brandBadge}>
-          <Text style={styles.brandText}>{data.details.brand}</Text>
+          <LabelBubble compact>
+            <Text style={[styles.brandText, { color: theme.colors.onSurface }]}>{data.details.brand}</Text>
+          </LabelBubble>
         </View>
       )}
 
       {/* Label */}
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'Boiler'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Boiler'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -183,7 +204,9 @@ export const HotWaterTankNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'Hot Water Tank'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Hot Water Tank'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -209,7 +232,9 @@ export const ColdWaterTankNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'Cold Water Tank'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Cold Water Tank'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -222,7 +247,9 @@ export const FlowMeterNode = ({ id, data }) => {
   return (
     <View style={styles.meterNode}>
       <View style={styles.valueBadge}>
-        <Text style={styles.valueText}>{data.value || 0}m³</Text>
+        <LabelBubble compact>
+          <Text style={[styles.valueText, { color: theme.colors.onSurface }]}>{data.value || 0}m³</Text>
+        </LabelBubble>
       </View>
 
       <View style={[styles.handleTop, { left: '50%' }]} />
@@ -242,7 +269,9 @@ export const FlowMeterNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.bottomLabel}>
-          <Text style={styles.labelSmallText}>{data.details?.name || 'Flow Meter'}</Text>
+          <LabelBubble compact>
+            <Text style={[styles.labelSmallText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Flow Meter'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -255,7 +284,9 @@ export const ReturnMeterNode = ({ id, data }) => {
   return (
     <View style={styles.meterNode}>
       <View style={styles.valueBadge}>
-        <Text style={styles.valueText}>{data.value || 0}m³</Text>
+        <LabelBubble compact>
+          <Text style={[styles.valueText, { color: theme.colors.onSurface }]}>{data.value || 0}m³</Text>
+        </LabelBubble>
       </View>
 
       <View style={[styles.handleTop, { left: '50%' }]} />
@@ -275,7 +306,9 @@ export const ReturnMeterNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.bottomLabel}>
-          <Text style={styles.labelSmallText}>{data.details?.name || 'Return Meter'}</Text>
+          <LabelBubble compact>
+            <Text style={[styles.labelSmallText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Return Meter'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -317,7 +350,9 @@ export const SensorNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.topLabel}>
-          <Text style={styles.labelSmallText}>{data.details?.name || 'Temperature Sensor'}</Text>
+          <LabelBubble compact>
+            <Text style={[styles.labelSmallText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Temperature Sensor'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -359,7 +394,9 @@ export const PressureSensorNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.topLabel}>
-          <Text style={styles.labelSmallText}>{data.details?.name || 'Pressure Sensor'}</Text>
+          <LabelBubble compact>
+            <Text style={[styles.labelSmallText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Pressure Sensor'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -390,7 +427,9 @@ export const WaterPumpNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'Water Pump'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Water Pump'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -424,7 +463,9 @@ export const ValveNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'Valve'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Valve'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -466,7 +507,9 @@ export const HeatExchangerNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'Heat Exchanger'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Heat Exchanger'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -490,7 +533,9 @@ export const ExpansionVesselNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'Exp. Vessel'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Exp. Vessel'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -520,7 +565,9 @@ export const ControllerNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'PLC Controller'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'PLC Controller'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -544,7 +591,9 @@ export const BoosterPumpNode = ({ id, data }) => {
 
       {data.showLabels !== false && (
         <View style={styles.nodeLabel}>
-          <Text style={styles.nodeLabelText}>{data.details?.name || 'Booster Pump'}</Text>
+          <LabelBubble>
+            <Text style={[styles.nodeLabelText, { color: theme.colors.onSurface }]}>{data.details?.name || 'Booster Pump'}</Text>
+          </LabelBubble>
         </View>
       )}
     </View>
@@ -637,7 +686,7 @@ const styles = StyleSheet.create({
   },
   labelText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontFamily: appFonts.bold.fontFamily,
     textAlign: 'center',
   },
   
@@ -649,7 +698,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontFamily: appFonts.bold.fontFamily,
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 4,
@@ -658,78 +707,60 @@ const styles = StyleSheet.create({
   brandBadge: {
     position: 'absolute',
     top: '32%',
-    left: '49%',
-    transform: [{ translateX: -50 }],
-    borderWidth: 1,
-    borderColor: 'grey',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 4,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   brandText: {
     fontSize: 6,
-    fontWeight: 'bold',
+    fontFamily: appFonts.bold.fontFamily,
   },
   nodeLabel: {
     position: 'absolute',
     top: '105%',
-    left: '50%',
-    transform: [{ translateX: -50 }],
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 4,
-    whiteSpace: 'nowrap',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   topLabel: {
     position: 'absolute',
-    top: -20,
-    left: '50%',
-    transform: [{ translateX: -50 }],
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 4,
+    top: -22,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   bottomLabel: {
     position: 'absolute',
-    bottom: -12,
-    left: '50%',
-    transform: [{ translateX: -50 }],
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 4,
+    bottom: -18,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   nodeLabelText: {
     fontSize: 8,
-    fontWeight: 'bold',
+    fontFamily: appFonts.bold.fontFamily,
   },
   labelSmallText: {
     fontSize: 7,
-    fontWeight: 'bold',
+    fontFamily: appFonts.bold.fontFamily,
   },
   valueBadge: {
     position: 'absolute',
     top: -17,
-    left: '50%',
-    transform: [{ translateX: -50 }],
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 4,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   valueText: {
     fontSize: 7,
-    fontWeight: 'bold',
+    fontFamily: appFonts.bold.fontFamily,
+  },
+  labelBubble: {
+    borderWidth: 1,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'center',
   },
   
   // Node Containers
@@ -786,6 +817,6 @@ const styles = StyleSheet.create({
   },
   tempDiffText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontFamily: appFonts.bold.fontFamily,
   },
 });

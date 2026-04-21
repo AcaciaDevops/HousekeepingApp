@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -12,169 +12,32 @@ import {
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import Draggable from 'react-native-draggable';
-import Svg, { Line, Path, Circle as SvgCircle, G, Text as SvgText, Defs, Marker } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { GestureHandlerRootView, PanGestureHandler, PinchGestureHandler, State } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useSharedValue } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '@react-navigation/native';
 import { saveSchematic, getSchematic } from '../../api/useSchematicService'; // ✅ Keep your original import
-
-// Node Components (same as before)
-const PointNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={styles.pointNode}>
-      <SvgCircle cx="10" cy="10" r="8" fill={data.color || '#333'} />
-      {data.showLabels && <Text style={styles.nodeLabel}>{data.label}</Text>}
-    </View>
-  </TouchableOpacity>
-);
-
-const LabelNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={styles.labelNode}>
-      <Text style={styles.labelText}>{data.label || 'Label'}</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const BoilerNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.boilerNode]}>
-      <Icon name="whatshot" size={30} color={data.status === 1 ? '#ff5722' : '#999'} />
-      <Text style={styles.nodeTitle}>Boiler</Text>
-      {data.showLabels && data.details?.name && (
-        <Text style={styles.nodeSubtitle}>{data.details.name}</Text>
-      )}
-    </View>
-  </TouchableOpacity>
-);
-
-const WaterPumpNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.waterPumpNode]}>
-      <Icon name="opacity" size={30} color={data.status === 1 ? '#2196f3' : '#999'} />
-      <Text style={styles.nodeTitle}>Pump</Text>
-      {data.showLabels && data.details?.name && (
-        <Text style={styles.nodeSubtitle}>{data.details.name}</Text>
-      )}
-    </View>
-  </TouchableOpacity>
-);
-
-const SensorNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.sensorNode]}>
-      <Icon name="thermostat" size={30} color="#4caf50" />
-      <Text style={styles.nodeTitle}>Sensor</Text>
-      {data.value !== undefined && <Text style={styles.nodeValue}>{data.value}°C</Text>}
-      {data.showLabels && data.details?.name && (
-        <Text style={styles.nodeSubtitle}>{data.details.name}</Text>
-      )}
-    </View>
-  </TouchableOpacity>
-);
-
-const ValveNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.valveNode]}>
-      <Icon name="settings" size={30} color="#ff9800" />
-      <Text style={styles.nodeTitle}>Valve</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const FlowMeterNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.flowMeterNode]}>
-      <Icon name="speed" size={30} color="#9c27b0" />
-      <Text style={styles.nodeTitle}>Flow Meter</Text>
-      {data.value !== undefined && <Text style={styles.nodeValue}>{data.value} L/min</Text>}
-    </View>
-  </TouchableOpacity>
-);
-
-const PressureSensorNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.pressureSensorNode]}>
-      <Icon name="gauge" size={30} color="#f44336" />
-      <Text style={styles.nodeTitle}>Pressure</Text>
-      {data.value !== undefined && <Text style={styles.nodeValue}>{data.value} bar</Text>}
-    </View>
-  </TouchableOpacity>
-);
-
-const HeatExchangerNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.heatExchangerNode]}>
-      <Icon name="swap-horiz" size={30} color="#795548" />
-      <Text style={styles.nodeTitle}>Heat Exchanger</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const ExpansionVesselNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.expansionVesselNode]}>
-      <Icon name="circle" size={30} color="#607d8b" />
-      <Text style={styles.nodeTitle}>Expansion Vessel</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const ControllerNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.controllerNode]}>
-      <Icon name="devices" size={30} color="#3f51b5" />
-      <Text style={styles.nodeTitle}>Controller</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const BoosterPumpNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.boosterPumpNode]}>
-      <Icon name="trending-up" size={30} color="#00bcd4" />
-      <Text style={styles.nodeTitle}>Booster Pump</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const TemperatureDifferenceNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.temperatureDifferenceNode]}>
-      <Icon name="compare-arrows" size={30} color="#e91e63" />
-      <Text style={styles.nodeTitle}>Temp Diff</Text>
-      {data.value !== undefined && <Text style={styles.nodeValue}>{data.value}°C</Text>}
-    </View>
-  </TouchableOpacity>
-);
-
-const HotWaterTankNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.hotWaterTankNode]}>
-      <Icon name="local-drink" size={30} color="#ff5722" />
-      <Text style={styles.nodeTitle}>Hot Water Tank</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const ColdWaterTankNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.coldWaterTankNode]}>
-      <Icon name="water-drop" size={30} color="#2196f3" />
-      <Text style={styles.nodeTitle}>Cold Water Tank</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const ReturnMeterNode = ({ data, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(data)}>
-    <View style={[styles.nodeContainer, styles.returnMeterNode]}>
-      <Icon name="rotate-left" size={30} color="#009688" />
-      <Text style={styles.nodeTitle}>Return Meter</Text>
-    </View>
-  </TouchableOpacity>
-);
+import { appFonts } from '../../config/theme';
+import { useNativeSchematicDrag } from './NativeSchematicDragContext';
+import {
+  PointNode,
+  LabelNode,
+  BoilerNode,
+  HotWaterTankNode,
+  ColdWaterTankNode,
+  WaterPumpNode,
+  SensorNode,
+  ValveNode,
+  FlowMeterNode,
+  ReturnMeterNode,
+  PressureSensorNode,
+  HeatExchangerNode,
+  ExpansionVesselNode,
+  ControllerNode,
+  BoosterPumpNode,
+  TemperatureDifferenceNode,
+} from './SchematicNodes';
 
 const nodeTypes = {
   point: PointNode,
@@ -202,6 +65,137 @@ const PIPE_COLORS = {
   GREY: '#616161',
 };
 
+const NODE_DEFAULT_SIZES = {
+  point: { width: 10, height: 10 },
+  label: { width: 100, height: 30 },
+  boiler: { width: 80, height: 100 },
+  hotWaterTank: { width: 80, height: 120 },
+  coldWaterTank: { width: 120, height: 70 },
+  flowMeter: { width: 40, height: 22 },
+  returnMeter: { width: 45, height: 22 },
+  waterPump: { width: 30, height: 30 },
+  sensor: { width: 35, height: 15 },
+  pressureSensor: { width: 35, height: 15 },
+  valve: { width: 80, height: 40 },
+  hex: { width: 50, height: 70 },
+  expansion: { width: 40, height: 90 },
+  controller: { width: 35, height: 40 },
+  boosterPump: { width: 30, height: 30 },
+  temperatureDifference: { width: 90, height: 30 },
+};
+
+const toNumber = (value, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const unwrapGraphicsData = (raw) => {
+  let payload = raw?.graphics_data ?? raw;
+
+  if (typeof payload === 'string') {
+    try {
+      payload = JSON.parse(payload);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  while (
+    payload &&
+    typeof payload === 'object' &&
+    !Array.isArray(payload) &&
+    payload.graphics_data &&
+    !payload.nodes &&
+    !payload.edges
+  ) {
+    payload = payload.graphics_data;
+  }
+
+  return payload || null;
+};
+
+const getNodeSize = (node) => {
+  const measured = node?.measured || {};
+  const defaults = NODE_DEFAULT_SIZES[node?.type] || { width: 50, height: 50 };
+
+  return {
+    width: toNumber(measured.width, defaults.width),
+    height: toNumber(measured.height, defaults.height),
+  };
+};
+
+const getHandleOrientation = (handle = '') => {
+  const normalized = String(handle).toLowerCase();
+
+  if (
+    normalized.includes('left') ||
+    normalized.startsWith('l-') ||
+    normalized.endsWith('-l') ||
+    normalized === 'l'
+  ) {
+    return 'left';
+  }
+
+  if (
+    normalized.includes('right') ||
+    normalized.startsWith('r-') ||
+    normalized.endsWith('-r') ||
+    normalized === 'r'
+  ) {
+    return 'right';
+  }
+
+  if (
+    normalized.includes('top') ||
+    normalized.startsWith('t-') ||
+    normalized.endsWith('-t') ||
+    normalized === 't'
+  ) {
+    return 'top';
+  }
+
+  if (
+    normalized.includes('bottom') ||
+    normalized.startsWith('b-') ||
+    normalized.endsWith('-b') ||
+    normalized === 'b'
+  ) {
+    return 'bottom';
+  }
+
+  return 'center';
+};
+
+const getAnchorPoint = (node, handle) => {
+  const { width, height } = getNodeSize(node);
+  const x = toNumber(node?.position?.x);
+  const y = toNumber(node?.position?.y);
+  const orientation = getHandleOrientation(handle);
+
+  switch (orientation) {
+    case 'left':
+      return { x, y: y + height / 2 };
+    case 'right':
+      return { x: x + width, y: y + height / 2 };
+    case 'top':
+      return { x: x + width / 2, y };
+    case 'bottom':
+      return { x: x + width / 2, y: y + height };
+    default:
+      return { x: x + width / 2, y: y + height / 2 };
+  }
+};
+
+const getEdgeColor = (edge, fallback) => edge?.style?.stroke || edge?.data?.color || fallback;
+
+const buildEdgePath = (sourceNode, targetNode, edge) => {
+  const sourcePoint = getAnchorPoint(sourceNode, edge?.sourceHandle);
+  const targetPoint = getAnchorPoint(targetNode, edge?.targetHandle);
+  const midX = (sourcePoint.x + targetPoint.x) / 2;
+
+  return `M ${sourcePoint.x} ${sourcePoint.y} L ${midX} ${sourcePoint.y} L ${midX} ${targetPoint.y} L ${targetPoint.x} ${targetPoint.y}`;
+};
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function SchematicBuilder({
@@ -217,7 +211,11 @@ export default function SchematicBuilder({
   toggleWaterPumpStatus
 }) {
   const theme = useTheme();
-  const reactFlowWrapper = useRef(null);
+  const canvasDropZoneRef = useRef(null);
+  const translateRef = useRef({ x: 0, y: 0 });
+  const scaleRef = useRef(1);
+  const panStartRef = useRef({ x: 0, y: 0 });
+  const pinchStartRef = useRef(1);
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [rfInstance, setRfInstance] = useState(null);
@@ -231,9 +229,14 @@ export default function SchematicBuilder({
   const [tempValue2, setTempValue2] = useState('');
   const [showComponentLabels, setShowComponentLabels] = useState(false);
   const [activeColor, setActiveColor] = useState(PIPE_COLORS.RED);
-  const lineColor = theme.palette?.text?.primary || '#333';
+  const { registerDropHandler } = useNativeSchematicDrag();
+  const lineColor = theme.colors?.text || theme.colors?.onSurface || '#333';
+  const surfaceColor = theme.colors?.card || theme.colors?.surface || '#fff';
+  const backgroundColor = theme.colors?.background || '#fafafa';
+  const borderColor = theme.colors?.border || theme.colors?.outline || '#e0e0e0';
+  const mutedActionColor = theme.colors?.text || theme.colors?.onSurface || '#333';
+  const gridColor = theme.dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
   
-  const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -241,7 +244,7 @@ export default function SchematicBuilder({
   const showLocalizedSnackbar = (id, defaultMessage, severity = 'success') => {
     setSnackbar({
       open: true,
-      message: defaultMessage, // You'll need to implement FormattedMessage equivalent
+      message: defaultMessage,
       severity
     });
   };
@@ -263,12 +266,27 @@ export default function SchematicBuilder({
 
       setIsLoading(true);
       try {
-        const data = await getSchematic(propertyId, graphicType); // ✅ Using your original API
-console.log("schematic:::",data)
-        if (data && data.graphics_data) {
-          const flow = data.graphics_data;
+        const data = await getSchematic(propertyId, graphicType);
+        const flow = unwrapGraphicsData(data);
+        if (flow) {
           setNodes(flow.nodes || []);
-          setEdges(flow.edges || []);
+          setEdges(
+            (flow.edges || []).map((edge) => ({
+              ...edge,
+              type: edge.type || 'step',
+              animated: false,
+              data: {
+                ...edge.data,
+                themeLinked:
+                  edge.data?.themeLinked ?? (!edge.style?.stroke && !edge.data?.customColor),
+              },
+              style: {
+                strokeWidth: 2,
+                stroke: getEdgeColor(edge, lineColor),
+                ...edge.style,
+              },
+            }))
+          );
           
           if (flow.viewport) {
             setViewportToRestore(flow.viewport);
@@ -285,7 +303,26 @@ console.log("schematic:::",data)
       }
     };
     loadData();
-  }, [propertyId, graphicType]);
+  }, [propertyId, graphicType, lineColor]);
+
+  useEffect(() => {
+    setEdges((currentEdges) =>
+      currentEdges.map((edge) => {
+        if (!edge?.data?.themeLinked) {
+          return edge;
+        }
+
+        return {
+          ...edge,
+          style: {
+            ...edge.style,
+            stroke: lineColor,
+            strokeWidth: 2,
+          },
+        };
+      })
+    );
+  }, [lineColor]);
 
   const onSave = useCallback(async () => {
     if (propertyId) {
@@ -295,7 +332,7 @@ console.log("schematic:::",data)
         viewport: { x: translateX.value, y: translateY.value, zoom: scale.value }
       };
       try {
-        await saveSchematic(propertyId, graphicType, { graphics_data: flow }); // ✅ Using your original API
+        await saveSchematic(propertyId, graphicType, flow);
         showLocalizedSnackbar('Layout Saved!', 'Layout Saved!');
       } catch (err) {
         showLocalizedSnackbar('Failed to save.', 'Failed to save.', 'error');
@@ -303,7 +340,19 @@ console.log("schematic:::",data)
     }
   }, [nodes, edges, propertyId, graphicType]);
 
-  // Keep all your original functions
+  useEffect(() => {
+    if (!viewportToRestore) return;
+
+    translateX.value = toNumber(viewportToRestore.x, 0);
+    translateY.value = toNumber(viewportToRestore.y, 0);
+    scale.value = toNumber(viewportToRestore.zoom, 1);
+    translateRef.current = {
+      x: toNumber(viewportToRestore.x, 0),
+      y: toNumber(viewportToRestore.y, 0),
+    };
+    scaleRef.current = toNumber(viewportToRestore.zoom, 1);
+  }, [viewportToRestore, scale, translateX, translateY]);
+
   const normalizeId = (id) =>
     String(id || '')
       .trim()
@@ -412,18 +461,94 @@ console.log("schematic:::",data)
     setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
   }, []);
 
+  const createNode = useCallback(
+    (type, position = { x: 100, y: 100 }) => ({
+      id: `${type}_${Date.now()}`,
+      type,
+      position,
+      data: {
+        label: type,
+        status: 0,
+        value: 0,
+        dbId: '',
+        details: {
+          name: '',
+          brand: '',
+          model: '',
+        },
+        onDelete: deleteNode,
+        readOnly,
+        showLabels: showComponentLabels,
+      },
+    }),
+    [deleteNode, readOnly, showComponentLabels]
+  );
+
+  useEffect(() => {
+    const unregister = registerDropHandler((item, pageX, pageY) => {
+      if (readOnly || !canvasDropZoneRef.current) {
+        return;
+      }
+
+      canvasDropZoneRef.current.measureInWindow((x, y, width, height) => {
+        const isInside =
+          pageX >= x &&
+          pageX <= x + width &&
+          pageY >= y &&
+          pageY <= y + height;
+
+        if (!isInside) {
+          return;
+        }
+
+        const canvasX = (pageX - x - translateRef.current.x) / scaleRef.current;
+        const canvasY = (pageY - y - translateRef.current.y) / scaleRef.current;
+
+        setNodes((currentNodes) =>
+          currentNodes.concat(
+            createNode(item.nodeType, {
+              x: Math.max(0, Math.round(canvasX)),
+              y: Math.max(0, Math.round(canvasY)),
+            })
+          )
+        );
+      });
+    });
+
+    return unregister;
+  }, [createNode, readOnly, registerDropHandler]);
+
+  useEffect(() => {
+    setNodes((currentNodes) =>
+      currentNodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          onDelete: deleteNode,
+          onEdit: () => onNodeClick(null, node),
+          pt1000Sensors,
+          readOnly,
+          showLabels: showComponentLabels,
+        },
+      }))
+    );
+  }, [deleteNode, pt1000Sensors, readOnly, showComponentLabels]);
+
   const onConnect = useCallback((params) => {
-    // Implement connection logic for React Native
     const newEdge = {
       id: `edge_${params.source}_${params.target}_${Date.now()}`,
       source: params.source,
       target: params.target,
       type: 'smoothstep',
       animated: false,
+      data: {
+        customColor: true,
+        themeLinked: false,
+      },
       style: {
         stroke: activeColor,
-        strokeWidth: 2
-      }
+        strokeWidth: 2,
+      },
     };
     setEdges((eds) => [...eds, newEdge]);
   }, [activeColor]);
@@ -490,11 +615,6 @@ console.log("schematic:::",data)
     showLocalizedSnackbar('Node updated successfully', 'Node updated successfully');
   };
 
-  const onDrop = useCallback((event) => {
-    // Implement drag and drop for React Native
-    // This would need to be adapted for React Native's drag and drop system
-  }, []);
-
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -504,48 +624,9 @@ console.log("schematic:::",data)
   }
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <View style={styles.header}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.toolbar}>
-            {Object.keys(nodeTypes).map((type) => (
-              !readOnly && (
-                <TouchableOpacity
-                  key={type}
-                  style={styles.toolbarButton}
-                  onPress={() => {
-                    const newNode = {
-                      id: `${type}_${Date.now()}`,
-                      type,
-                      position: { x: 100, y: 100 },
-                      data: {
-                        label: type,
-                        status: 0,
-                        value: 0,
-                        dbId: '',
-                        details: {
-                          name: '',
-                          brand: '',
-                          model: ''
-                        },
-                        onDelete: deleteNode,
-                        readOnly,
-                        showLabels: showComponentLabels
-                      }
-                    };
-                    setNodes((nds) => [...nds, newNode]);
-                  }}
-                >
-                  <Text style={styles.toolbarButtonText}>
-                    {formatNodeTypeLabel(type)}
-                  </Text>
-                </TouchableOpacity>
-              )
-            ))}
-          </View>
-        </ScrollView>
-        
-        <View style={styles.colorPicker}>
+    <GestureHandlerRootView style={[styles.container, { backgroundColor }]}>
+      <View style={[styles.header, { backgroundColor: surfaceColor, borderBottomColor: borderColor }]}>
+        <View style={[styles.colorPicker, { borderBottomColor: borderColor }]}>
           <TouchableOpacity onPress={() => setActiveColor(PIPE_COLORS.RED)}>
             <View style={[styles.colorCircle, { backgroundColor: PIPE_COLORS.RED, opacity: activeColor === PIPE_COLORS.RED ? 1 : 0.3 }]} />
           </TouchableOpacity>
@@ -560,11 +641,11 @@ console.log("schematic:::",data)
           </TouchableOpacity>
           
           <TouchableOpacity onPress={() => setShowComponentLabels(!showComponentLabels)}>
-            <Icon name={showComponentLabels ? "visibility" : "visibility-off"} size={24} />
+            <Icon name={showComponentLabels ? "visibility" : "visibility-off"} size={24} color={mutedActionColor} />
           </TouchableOpacity>
           
           {!readOnly && (
-            <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+            <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.colors?.primary || '#4caf50' }]} onPress={onSave}>
               <Icon name="save" size={24} color="#fff" />
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
@@ -573,20 +654,35 @@ console.log("schematic:::",data)
       </View>
 
       <PinchGestureHandler
+        onHandlerStateChange={(event) => {
+          if (event.nativeEvent.state === State.BEGAN) {
+            pinchStartRef.current = scaleRef.current;
+          }
+        }}
         onGestureEvent={(event) => {
-          scale.value = event.nativeEvent.scale;
+          const nextScale = Math.max(0.4, Math.min(2.5, pinchStartRef.current * event.nativeEvent.scale));
+          scaleRef.current = nextScale;
+          scale.value = nextScale;
         }}
       >
-        <Animated.View style={styles.canvasContainer}>
+        <View ref={canvasDropZoneRef} collapsable={false} style={styles.canvasContainer}>
           <PanGestureHandler
+            onHandlerStateChange={(event) => {
+              if (event.nativeEvent.state === State.BEGAN) {
+                panStartRef.current = { ...translateRef.current };
+              }
+            }}
             onGestureEvent={(event) => {
-              translateX.value += event.nativeEvent.translationX;
-              translateY.value += event.nativeEvent.translationY;
+              translateRef.current.x = panStartRef.current.x + event.nativeEvent.translationX;
+              translateRef.current.y = panStartRef.current.y + event.nativeEvent.translationY;
+              translateX.value = translateRef.current.x;
+              translateY.value = translateRef.current.y;
             }}
           >
             <Animated.View
               style={[
                 styles.canvas,
+                { backgroundColor },
                 {
                   transform: [
                     { translateX: translateX.value },
@@ -596,6 +692,30 @@ console.log("schematic:::",data)
                 },
               ]}
             >
+              <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+                {Array.from({ length: 120 }).map((_, index) => {
+                  const offset = index * 20;
+                  return (
+                    <Path
+                      key={`grid-v-${index}`}
+                      d={`M ${offset} 0 L ${offset} 5000`}
+                      stroke={gridColor}
+                      strokeWidth={1}
+                    />
+                  );
+                })}
+                {Array.from({ length: 120 }).map((_, index) => {
+                  const offset = index * 20;
+                  return (
+                    <Path
+                      key={`grid-h-${index}`}
+                      d={`M 0 ${offset} L 5000 ${offset}`}
+                      stroke={gridColor}
+                      strokeWidth={1}
+                    />
+                  );
+                })}
+              </Svg>
               <Svg style={StyleSheet.absoluteFill}>
                 {edges.map((edge) => {
                   const sourceNode = nodes.find((n) => n.id === edge.source);
@@ -604,14 +724,14 @@ console.log("schematic:::",data)
                   if (!sourceNode || !targetNode) return null;
                   
                   return (
-                    <Line
+                    <Path
                       key={edge.id}
-                      x1={sourceNode.position.x + 50}
-                      y1={sourceNode.position.y + 50}
-                      x2={targetNode.position.x + 50}
-                      y2={targetNode.position.y + 50}
-                      stroke={edge.style?.stroke || activeColor}
-                      strokeWidth={2}
+                      d={buildEdgePath(sourceNode, targetNode, edge)}
+                      stroke={getEdgeColor(edge, lineColor)}
+                      strokeWidth={edge.style?.strokeWidth || 2}
+                      fill="none"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
                     />
                   );
                 })}
@@ -639,26 +759,23 @@ console.log("schematic:::",data)
                     }}
                     disabled={readOnly}
                   >
-                    <TouchableOpacity onPress={(event) => onNodeClick(event, node)}>
-                      <NodeComponent
-                        data={{ ...node.data, showLabels: showComponentLabels }}
-                        onPress={onNodeClick}
-                      />
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => onNodeClick(null, node)}>
+                      <NodeComponent id={node.id} data={{ ...node.data, showLabels: showComponentLabels }} />
                     </TouchableOpacity>
                   </Draggable>
                 );
               })}
             </Animated.View>
           </PanGestureHandler>
-        </Animated.View>
+        </View>
       </PinchGestureHandler>
 
       {/* Snackbar/Alert replacement */}
       {snackbar.open && (
-        <View style={styles.snackbar}>
+        <View style={[styles.snackbar, { backgroundColor: theme.dark ? '#1f1f1f' : '#333' }]}>
           <Text style={styles.snackbarText}>{snackbar.message}</Text>
           <TouchableOpacity onPress={() => setSnackbar({ ...snackbar, open: false })}>
-            <Text style={styles.snackbarAction}>OK</Text>
+            <Text style={[styles.snackbarAction, { color: theme.colors?.primary || '#4caf50' }]}>OK</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -671,8 +788,8 @@ console.log("schematic:::",data)
         onRequestClose={() => setEditDialogOpen(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
+          <View style={[styles.modalContent, { backgroundColor: surfaceColor }]}>
+            <Text style={[styles.modalTitle, { color: lineColor }]}>
               {selectedNode?.type === 'label' ? 'Edit Label' : 
                selectedNode?.type === 'temperatureDifference' ? 'Assign Temperature Sensors' :
                `Assign ${formatNodeTypeLabel(selectedNode?.type)}`}
@@ -681,38 +798,39 @@ console.log("schematic:::",data)
             <ScrollView>
               {selectedNode?.type === 'label' && (
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { borderColor, color: lineColor, backgroundColor }]}
                   value={tempValue}
                   onChangeText={setTempValue}
                   placeholder="Label Text"
+                  placeholderTextColor={theme.dark ? '#9aa0aa' : '#777'}
                   autoFocus
                 />
               )}
               
               {selectedNode?.type === 'temperatureDifference' && (
                 <View>
-                  <Text style={styles.label}>Sensor 1 (Flow)</Text>
+                  <Text style={[styles.label, { color: lineColor }]}>Sensor 1 (Flow)</Text>
                   <ScrollView style={styles.pickerList}>
                     {pt1000Sensors.map((s) => (
                       <TouchableOpacity
                         key={s.id}
-                        style={styles.pickerItem}
+                        style={[styles.pickerItem, { borderBottomColor: borderColor }]}
                         onPress={() => setTempValue1(s.id)}
                       >
-                        <Text>{s.name}</Text>
+                        <Text style={{ color: lineColor }}>{s.name}</Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
                   
-                  <Text style={styles.label}>Sensor 2 (Return)</Text>
+                  <Text style={[styles.label, { color: lineColor }]}>Sensor 2 (Return)</Text>
                   <ScrollView style={styles.pickerList}>
                     {pt1000Sensors.map((s) => (
                       <TouchableOpacity
                         key={s.id}
-                        style={styles.pickerItem}
+                        style={[styles.pickerItem, { borderBottomColor: borderColor }]}
                         onPress={() => setTempValue2(s.id)}
                       >
-                        <Text>{s.name}</Text>
+                        <Text style={{ color: lineColor }}>{s.name}</Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
@@ -724,10 +842,10 @@ console.log("schematic:::",data)
                   {getDeviceList(selectedNode?.type).map((device) => (
                     <TouchableOpacity
                       key={device.id}
-                      style={styles.pickerItem}
+                      style={[styles.pickerItem, { borderBottomColor: borderColor }]}
                       onPress={() => setTempValue(device.id)}
                     >
-                      <Text>{device.name}</Text>
+                      <Text style={{ color: lineColor }}>{device.name}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -736,9 +854,9 @@ console.log("schematic:::",data)
             
             <View style={styles.modalButtons}>
               <TouchableOpacity onPress={() => setEditDialogOpen(false)} style={styles.modalButton}>
-                <Text>Cancel</Text>
+                <Text style={{ color: lineColor }}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleDialogSave} style={[styles.modalButton, styles.modalButtonPrimary]}>
+              <TouchableOpacity onPress={handleDialogSave} style={[styles.modalButton, styles.modalButtonPrimary, { backgroundColor: theme.colors?.primary || '#2196f3' }]}>
                 <Text style={styles.modalButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
@@ -760,36 +878,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    backgroundColor: '#fff',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-  },
-  toolbar: {
-    flexDirection: 'row',
-    padding: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  toolbarButton: {
-    backgroundColor: '#2196f3',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  toolbarButtonText: {
-    color: '#fff',
-    fontSize: 12,
   },
   colorPicker: {
     flexDirection: 'row',
     padding: 8,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   colorCircle: {
     width: 24,
@@ -799,7 +899,6 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flexDirection: 'row',
-    backgroundColor: '#4caf50',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 4,
@@ -809,6 +908,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#fff',
     marginLeft: 4,
+    fontFamily: appFonts.bold.fontFamily,
   },
   canvasContainer: {
     flex: 1,
@@ -816,108 +916,6 @@ const styles = StyleSheet.create({
   },
   canvas: {
     flex: 1,
-    backgroundColor: '#fafafa',
-  },
-  nodeContainer: {
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    minWidth: 100,
-    alignItems: 'center',
-  },
-  boilerNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#ff5722',
-  },
-  waterPumpNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#2196f3',
-  },
-  sensorNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#4caf50',
-  },
-  valveNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#ff9800',
-  },
-  flowMeterNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#9c27b0',
-  },
-  pressureSensorNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#f44336',
-  },
-  heatExchangerNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#795548',
-  },
-  expansionVesselNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#607d8b',
-  },
-  controllerNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#3f51b5',
-  },
-  boosterPumpNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#00bcd4',
-  },
-  temperatureDifferenceNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#e91e63',
-  },
-  hotWaterTankNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#ff5722',
-  },
-  coldWaterTankNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#2196f3',
-  },
-  returnMeterNode: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#009688',
-  },
-  pointNode: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-  },
-  labelNode: {
-    padding: 8,
-    backgroundColor: '#fff3e0',
-    borderRadius: 4,
-  },
-  labelText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  nodeTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  nodeSubtitle: {
-    fontSize: 10,
-    color: '#666',
-    marginTop: 2,
-  },
-  nodeValue: {
-    fontSize: 10,
-    color: '#2196f3',
-    marginTop: 2,
-  },
-  nodeLabel: {
-    fontSize: 10,
-    marginTop: 2,
   },
   snackbar: {
     position: 'absolute',
@@ -946,7 +944,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 20,
     width: '90%',
@@ -954,8 +951,8 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
     marginBottom: 16,
+    fontFamily: appFonts.bold.fontFamily,
   },
   input: {
     borderWidth: 1,
@@ -966,9 +963,9 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: 'bold',
     marginTop: 8,
     marginBottom: 4,
+    fontFamily: appFonts.bold.fontFamily,
   },
   pickerList: {
     maxHeight: 200,
@@ -993,5 +990,6 @@ const styles = StyleSheet.create({
   },
   modalButtonText: {
     color: '#fff',
+    fontFamily: appFonts.bold.fontFamily,
   },
 });
