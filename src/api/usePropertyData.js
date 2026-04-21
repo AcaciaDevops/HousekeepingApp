@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { getAuthorizationHeader } from '../utils/getAuthorizationHeader';
+import { PROPERTY_SERVICE_API_URL } from '../config/env';
 
-const API_URL = process.env.EXPO_PUBLIC_APP_API_PROPERTY_SERVICE_URL || 'YOUR_API_URL';
+ const API_URL =`${PROPERTY_SERVICE_API_URL}/property`;
+ 
 const UPDATE_ALLOWED_FIELDS = [
   'property_portfolio_id',
   'property_name',

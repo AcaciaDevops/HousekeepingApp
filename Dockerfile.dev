@@ -1,0 +1,22 @@
+# Simplified Dockerfile for Expo Web Development
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies with legacy peer deps flag to handle conflicts
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
+# Copy application code
+COPY . .
+
+# Expose Expo web default port
+EXPOSE 19006 19007 5555
+
+# Environment variables
+ENV EXPO_DEBUG=false \
+    PATH=/app/node_modules/.bin:$PATH
+
+# Run Expo web development server and bind to all network interfaces
+CMD ["expo", "start", "--web", "--host", "0.0.0.0", "--port", "19006", "--clear"]

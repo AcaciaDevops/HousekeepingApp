@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "PMS App",
+    "name": "Acacia Maintenance App",
     "slug": "pms-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/acaciaLogo.png",
     "userInterfaceStyle": "light",
     "scheme": "pmsapp",
     "description": "Professional Property Management System App for hotel housekeeping and management.",
@@ -14,7 +14,7 @@
       "web"
     ],
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/acaciaLogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -53,7 +53,7 @@
       "package": "com.yourcompany.pmsapp",
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/acaciaLogo.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -65,7 +65,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/acaciaLogo.png"
     },
     "notification": {
       "icon": "./assets/notification-icon.png",

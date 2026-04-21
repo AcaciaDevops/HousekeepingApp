@@ -14,6 +14,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useAppTheme } from "../context/ThemeContext";
 
 const Drawer = createDrawerNavigator();
+const COLLAPSED_DRAWER_WIDTH = 40;
+const EXPANDED_DRAWER_WIDTH = 180;
 
 export default function AppDrawer({ user }) {
     const { tokens } = useAppTheme();
@@ -31,11 +33,21 @@ export default function AppDrawer({ user }) {
                     drawerContent={(props) => <CustomDrawer {...props} user={user} isExpanded={isExpanded} setIsExpanded={setIsExpanded} />}
                     screenOptions={{
                         drawerType: 'permanent', // Make drawer permanent
+                        sceneStyle: {
+                            marginLeft: COLLAPSED_DRAWER_WIDTH,
+                            backgroundColor: tokens.background,
+                        },
                         drawerStyle: {
-                            // position:'absolute',
-                            // left:0,
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            zIndex: 20,
                             backgroundColor: tokens.drawer,
-                            width: isExpanded ? 180 : 40
+                            width: isExpanded ? EXPANDED_DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
+                            borderRightWidth: 0,
+                            elevation: 0,
+                            shadowOpacity: 0,
                         },
                         headerShown: false,
                         headerStyle: {

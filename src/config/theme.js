@@ -124,6 +124,7 @@ const taskPalette = {
 const baseTokens = {
   background: palette.acaciaCottonBall,
   text: palette.acaciaSatinDeepBlack,
+  textSecondary: '#6b7280',
   border: palette.acaciaEnamelledDragon,
   heading: palette.acaciaZucchini,
   button: palette.acaciaZucchini,
@@ -133,6 +134,9 @@ const baseTokens = {
   block: palette.acaciaCarolinaParakeet,
   blockSecondary: palette.acaciaCottonBall,
   info: palette.acaciaEnamelledDragon,
+  success: '#4caf50',
+  warning: '#ff9800',
+  error: '#f44336',
   link: palette.acaciaEnamelledDragon,
   icon: palette.acaciaZucchini,
   surface: palette.acaciaCarolinaParakeet,
@@ -147,12 +151,14 @@ const baseTokens = {
 
 const lightTokens = {
   ...baseTokens,
+  buttonText: palette.acaciaCottonBall,
 };
 
 const darkTokens = {
   ...baseTokens,
   background: palette.acaciaSatinDeepBlack,
   text: palette.acaciaCottonBall,
+  textSecondary: '#d1d5db',
   border: palette.acaciaEnamelledDragon,
   heading: palette.acaciaCarolinaParakeet,
   button: palette.acaciaCarolinaParakeet,

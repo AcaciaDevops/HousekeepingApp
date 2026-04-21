@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SENSOR_SERVICE_API_URL } from '../config/env';
 
-// You'll need to store these in a config file or use react-native-config
-// For React Native, you can use react-native-dotenv or a config file
-const DEVICE_API_URL = process.env.EXPO_PUBLIC_APP_API_SENSOR_URL;
-const DATA_API_URL = process.env.EXPO_PUBLIC_APP_API_SENSOR_DATA_URL;
-const LOGS_API_URL = process.env.EXPO_PUBLIC_APP_API_SENSOR_LOGS_URL;
+const DEVICE_API_URL =`${SENSOR_SERVICE_API_URL}/sensor`;
+const DATA_API_URL =`${SENSOR_SERVICE_API_URL}/sensorData`;
 
 const useSensorData = () => {
   const [sensors, setSensors] = useState([]);

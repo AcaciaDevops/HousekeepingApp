@@ -1,14 +1,13 @@
 import { useState, useCallback } from 'react';
 import { getAuthorizationHeader } from '../utils/getAuthorizationHeader';
-
-const API_URL = process.env.EXPO_PUBLIC_APP_API_PORTFOLIO_SERVICE_URL || 'YOUR_API_URL';
+import { PORTFOLIO_SERVICE_API_URL } from '../config/env';
 
 const usePortfolio = () => {
   const [portfolios, setPortfolios] = useState([]);
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+ const API_URL = `${PORTFOLIO_SERVICE_API_URL}/portfolio`;
   // Helper function to make authenticated requests
   const makeRequest = async (url, options = {}) => {
     const authHeader = await getAuthorizationHeader();

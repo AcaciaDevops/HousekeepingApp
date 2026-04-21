@@ -1,13 +1,12 @@
-import React, { useState, useMemo } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
-import { Button, Menu, Chip, Divider } from "react-native-paper";
+import React, { useMemo, useState } from "react";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Divider, Menu } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { updateTaskStatus } from "../../api/TasksApi";
 import useAuth from "../../features/auth/hooks/useAuth";
 import { useAppTheme } from "../../context/ThemeContext";
 import { useThemedStyles } from "../../utils/useThemedStyles";
 
-// Constants
 const TASK_STATUSES = [
   "pending",
   "in_progress",
@@ -29,19 +28,16 @@ const ROLE_ALLOWED_STATUSES = {
 
 const MANAGER_ROLES = ["MaintenanceManager", "HousekeepingManager"];
 
-// Helper function to format status display
-const formatStatus = (status) => 
-  status?.replace(/_/g, " ").replace(/\b\w/g, char => char.toUpperCase());
+const formatStatus = (status) =>
+  status?.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
-// Helper function to format date
 const formatDate = (dateStr) => {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleString();
 };
 
-// Status icon mapping
 const getStatusIcon = (status) => {
   const icons = {
     pending: "clock-outline",
@@ -55,37 +51,47 @@ const getStatusIcon = (status) => {
   return icons[status] || "help-circle";
 };
 
-// Get status color with fallback
 const getStatusColor = (status, tokens) => {
   const statusColors = {
-    pending: "#FFA500",
-    in_progress: "#2196F3",
-    completed: "#4CAF50",
-    under_review: "#9C27B0",
-    approved: "#8BC34A",
-    rejected: "#F44336",
-    reassigned: "#FF9800",
+    pending: "#F59E0B",
+    in_progress: "#3B82F6",
+    completed: "#10B981",
+    under_review: "#8B5CF6",
+    approved: "#84CC16",
+    rejected: "#EF4444",
+    reassigned: "#F97316",
   };
-  return tokens?.taskStatus?.[status] || statusColors[status] || "#757575";
+  return tokens?.taskStatus?.[status] || statusColors[status] || "#64748B";
 };
 
-// Priority color mapping with fallbacks
-const getPriorityColor = (priority, tokens) => {
+const getPriorityColor = (priority) => {
   const colors = {
-    high: "#F44336",
-    medium: "#FF9800",
-    low: "#4CAF50",
+    high: "#EF4444",
+    medium: "#F59E0B",
+    low: "#10B981",
   };
-  return colors[priority?.toLowerCase()] || "#757575";
+  return colors[priority?.toLowerCase()] || "#64748B";
 };
+
+function DetailRow({ icon, label, value, labelWidth = 88, labelColor, valueColor, iconColor, iconStyle, styles }) {
+  return (
+    <View style={styles.detailRow}>
+      <MaterialCommunityIcons name={icon} size={15} color={iconColor} style={iconStyle} />
+      <Text style={[styles.detailLabel, { minWidth: labelWidth, color: labelColor }]} numberOfLines={1}>
+        {label}
+      </Text>
+      <Text style={[styles.detailValue, { color: valueColor }]} numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
+}
 
 export default function TaskCard({ task, onStatusUpdated }) {
-  
   const { user } = useAuth();
-  console.log("user:::123",user)
   const { tokens } = useAppTheme();
   const styles = useThemedStyles(createTaskItemStyles);
-  
+
   const [status, setStatus] = useState(task.task_status);
   const [menuVisible, setMenuVisible] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -94,18 +100,10 @@ export default function TaskCard({ task, onStatusUpdated }) {
   const isManager = MANAGER_ROLES.includes(userRole);
   const allowedStatuses = ROLE_ALLOWED_STATUSES[userRole] || TASK_STATUSES;
 
-  // Safe token access with fallbacks
-  const safeTokens = {
-    surface: tokens?.surface || "#FFFFFF",
-    text: tokens?.text || "#000000",
-    textSecondary: tokens?.textSecondary || "#666666",
-    border: tokens?.border || "#E0E0E0",
-    primary: tokens?.primary || "#2196F3",
-    buttonText: tokens?.buttonText || "#FFFFFF",
-    error: tokens?.error || "#F44336",
-    warning: tokens?.warning || "#FF9800",
-    success: tokens?.success || "#4CAF50",
-  };
+  const statusColor = getStatusColor(status, tokens);
+  const priorityColor = getPriorityColor(task.priority);
+  const textColor = tokens.text;
+  const secondaryColor = tokens.textSecondary || tokens.text;
 
   const handleStatusChange = async (newStatus) => {
     if (newStatus === status) return;
@@ -125,79 +123,86 @@ export default function TaskCard({ task, onStatusUpdated }) {
     }
   };
 
-  // Memoized timestamp fields for managers
   const managerTimestamps = useMemo(() => {
     if (!isManager) return null;
     return (
       <>
-        <View style={styles.timestampRow}>
-          <MaterialCommunityIcons name="clock-start" size={14} color={safeTokens.textSecondary} />
-          <Text style={styles.detailLabel}>Started at:</Text>
-          <Text style={styles.timestampValue}>{formatDate(task.started_at)}</Text>
-        </View>
-        <View style={styles.timestampRow}>
-          <MaterialCommunityIcons name="eye-check" size={14} color={safeTokens.textSecondary} />
-          <Text style={styles.detailLabel}>Under Review at:</Text>
-          <Text style={styles.timestampValue}>{formatDate(task.under_review_at)}</Text>
-        </View>
-        <View style={styles.timestampRow}>
-          <MaterialCommunityIcons name="check-decagram" size={14} color={safeTokens.success} />
-          <Text style={styles.detailLabel}>Approved at:</Text>
-          <Text style={styles.timestampValue}>{formatDate(task.approved_at)}</Text>
-        </View>
-        <View style={styles.timestampRow}>
-          <MaterialCommunityIcons name="refresh" size={14} color={safeTokens.warning} />
-          <Text style={styles.detailLabel}>Reassigned at:</Text>
-          <Text style={styles.timestampValue}>{formatDate(task.reassigned_at)}</Text>
-        </View>
+        <DetailRow
+          icon="clock-start"
+          label="Started at:"
+          value={formatDate(task.started_at)}
+          labelWidth={100}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={secondaryColor}
+          iconStyle={styles.rowIcon}          styles={styles}        />
+        <DetailRow
+          icon="eye-check"
+          label="Under Review at:"
+          value={formatDate(task.under_review_at)}
+          labelWidth={100}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={secondaryColor}
+          iconStyle={styles.rowIcon}          styles={styles}        />
+        <DetailRow
+          icon="check-decagram"
+          label="Approved at:"
+          value={formatDate(task.approved_at)}
+          labelWidth={100}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={tokens.success}
+          iconStyle={styles.rowIcon}
+          styles={styles}
+        />
+        <DetailRow
+          icon="refresh"
+          label="Reassigned at:"
+          value={formatDate(task.reassigned_at)}
+          labelWidth={100}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={tokens.warning}
+          iconStyle={styles.rowIcon}
+          styles={styles}
+        />
       </>
     );
-  }, [isManager, task, safeTokens]);
-
-  const statusColor = getStatusColor(status, tokens);
+  }, [isManager, task, textColor, secondaryColor, tokens]);
 
   return (
-    <View style={[styles.taskCard, { 
-      borderLeftColor: safeTokens.primary,
-      backgroundColor: safeTokens.surface,
-      borderColor: safeTokens.border,
-    }]}>
-      {/* Header Section */}
+    <View style={styles.taskCard}>
       <View style={styles.headerSection}>
         <View style={styles.titleContainer}>
-          <MaterialCommunityIcons 
-            name="clipboard-list" 
-            size={20} 
-            color={safeTokens.primary} 
-          />
-          <Text style={[styles.taskName, { color: safeTokens.text }]}>
-            {task.task_name}
-          </Text>
+          <View style={[styles.iconWrap, { backgroundColor: `${tokens.button}18` }]}>
+            <MaterialCommunityIcons name="clipboard-list" size={18} color={tokens.button} />
+          </View>
+          <View style={styles.titleTextBlock}>
+            <Text style={styles.taskName} numberOfLines={2}>
+              {task.task_name}
+            </Text>
+            <Text style={styles.taskMeta} numberOfLines={1}>
+              Room {task.room_id} · {task.task_type}
+            </Text>
+          </View>
         </View>
-        
+
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
           anchor={
-            <Button
-              mode="contained"
+            <Pressable
               onPress={() => setMenuVisible(true)}
-              style={[
-                styles.statusButton,
-                { backgroundColor: statusColor }
+              style={({ pressed }) => [
+                styles.statusChip,
+                { backgroundColor: `${statusColor}16`, borderColor: statusColor },
+                pressed && styles.pressedChip,
               ]}
-              loading={updatingStatus}
-              labelStyle={styles.statusButtonLabel}
-              icon={() => (
-                <MaterialCommunityIcons 
-                  name={getStatusIcon(status)} 
-                  size={16} 
-                  color="#FFFFFF" 
-                />
-              )}
             >
-              {formatStatus(status)}
-            </Button>
+              <MaterialCommunityIcons name={getStatusIcon(status)} size={14} color={statusColor} />
+              <Text style={[styles.statusChipText, { color: statusColor }]}>{formatStatus(status)}</Text>
+            </Pressable>
           }
           contentStyle={styles.menuContent}
         >
@@ -208,83 +213,98 @@ export default function TaskCard({ task, onStatusUpdated }) {
               onPress={() => handleStatusChange(s)}
               disabled={s === status}
               leadingIcon={() => (
-                <MaterialCommunityIcons 
-                  name={getStatusIcon(s)} 
-                  size={18} 
-                  color={s === status ? safeTokens.primary : safeTokens.textSecondary}
+                <MaterialCommunityIcons
+                  name={getStatusIcon(s)}
+                  size={18}
+                  color={s === status ? tokens.button : tokens.textSecondary}
                 />
               )}
-              style={s === status && styles.activeMenuItem}
-              titleStyle={s === status && { color: safeTokens.primary }}
+              style={s === status ? styles.activeMenuItem : null}
+              titleStyle={s === status ? { color: tokens.button } : null}
             />
           ))}
         </Menu>
       </View>
 
-      <Divider style={[styles.divider, { backgroundColor: safeTokens.border }]} />
+      <Divider style={styles.divider} />
 
-      {/* Details Section */}
       <View style={styles.detailsSection}>
+        <DetailRow
+          icon="door"
+          label="Room No:"
+          labelWidth={100}
+          value={task.room_id}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={secondaryColor}
+          iconStyle={styles.rowIcon}
+          styles={styles}
+        />
+        <DetailRow
+          icon="account"
+          label="Assigned to:"
+          labelWidth={100}
+          value={task.assigned_to}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={secondaryColor}
+          iconStyle={styles.rowIcon}
+          styles={styles}
+        />
         <View style={styles.detailRow}>
-          <MaterialCommunityIcons name="door" size={16} color={safeTokens.textSecondary} />
-          <Text style={styles.detailLabel}>Room No:</Text>
-          <Text style={[styles.detailValue, { color: safeTokens.text }]}>{task.room_id}</Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <MaterialCommunityIcons name="account" size={16} color={safeTokens.textSecondary} />
-          <Text style={styles.detailLabel}>Assigned to:</Text>
-          <Text style={[styles.detailValue, { color: safeTokens.text }]}>{task.assigned_to}</Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <MaterialCommunityIcons name="flag" size={16} color={getPriorityColor(task.priority, tokens)} />
-          <Text style={styles.detailLabel}>Priority:</Text>
-          <View style={[
-            styles.priorityChip,
-            { backgroundColor: getPriorityColor(task.priority, tokens) + "20" }
-          ]}>
-            <Text style={[
-              styles.priorityText,
-              { color: getPriorityColor(task.priority, tokens) }
-            ]}>
-              {task.priority?.toUpperCase() || "MEDIUM"}
-            </Text>
+          <MaterialCommunityIcons name="flag" size={15} color={priorityColor} style={styles.rowIcon} />
+          <Text style={[styles.detailLabel, { color: textColor }]} numberOfLines={1}>
+            Priority:
+          </Text>
+          <View style={[styles.priorityChip, { backgroundColor: `${priorityColor}18` }]}>
+            <Text style={[styles.priorityText, { color: priorityColor }]}>{task.priority?.toUpperCase() || "MEDIUM"}</Text>
           </View>
         </View>
 
         {task.notes ? (
           <View style={styles.notesContainer}>
-            <MaterialCommunityIcons name="note-text" size={16} color={safeTokens.textSecondary} />
-            <Text style={[styles.notesText, { color: safeTokens.textSecondary }]}>
-              {task.notes}
-            </Text>
+            <MaterialCommunityIcons name="note-text" size={15} color={secondaryColor} style={styles.rowIcon} />
+            <Text style={[styles.notesText, { color: textColor }]}>{task.notes}</Text>
           </View>
         ) : null}
       </View>
 
-      <Divider style={[styles.divider, { backgroundColor: safeTokens.border }]} />
+      <Divider style={styles.divider} />
 
-      {/* Timestamps Section */}
       <View style={styles.timestampsSection}>
-        <View style={styles.timestampRow}>
-          <MaterialCommunityIcons name="calendar-clock" size={14} color={safeTokens.textSecondary} />
-          <Text style={styles.detailLabel}>Assigned at:</Text>
-          <Text style={styles.timestampValue}>{formatDate(task.assigned_at)}</Text>
-        </View>
-
-        <View style={styles.timestampRow}>
-          <MaterialCommunityIcons name="check-circle" size={14} color={safeTokens.success} />
-          <Text style={styles.detailLabel}>Completed at:</Text>
-          <Text style={styles.timestampValue}>{formatDate(task.completed_at)}</Text>
-        </View>
-
-        <View style={styles.timestampRow}>
-          <MaterialCommunityIcons name="close-circle" size={14} color={safeTokens.error} />
-          <Text style={styles.detailLabel}>Rejected at:</Text>
-          <Text style={styles.timestampValue}>{formatDate(task.rejected_at)}</Text>
-        </View>
-
+        <DetailRow
+          icon="calendar-clock"
+          label="Assigned at:"
+          value={formatDate(task.assigned_at)}
+          labelWidth={100}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={secondaryColor}
+          iconStyle={styles.rowIcon}
+          styles={styles}
+        />
+        <DetailRow
+          icon="check-circle"
+          label="Completed at:"
+          value={formatDate(task.completed_at)}
+          labelWidth={100}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={tokens.success}
+          iconStyle={styles.rowIcon}
+          styles={styles}
+        />
+        <DetailRow
+          icon="close-circle"
+          label="Rejected at:"
+          value={formatDate(task.rejected_at)}
+          labelWidth={100}
+          labelColor={textColor}
+          valueColor={textColor}
+          iconColor={tokens.error}
+          iconStyle={styles.rowIcon}
+          styles={styles}
+        />
         {managerTimestamps}
       </View>
     </View>
@@ -294,115 +314,144 @@ export default function TaskCard({ task, onStatusUpdated }) {
 const createTaskItemStyles = (tokens) =>
   StyleSheet.create({
     taskCard: {
-      marginVertical: 8,
-      marginHorizontal: 16,
+      marginBottom: 12,
       borderRadius: 12,
       borderWidth: 1,
-      borderLeftWidth: 4,
       overflow: "hidden",
       elevation: 2,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      backgroundColor: tokens.surface,
+      borderColor: tokens.border,
     },
     headerSection: {
       flexDirection: "row",
       justifyContent: "space-between",
-      alignItems: "center",
-      padding: 12,
-      paddingBottom: 8,
+      alignItems: "flex-start",
+      paddingHorizontal: 14,
+      paddingTop: 14,
+      paddingBottom: 10,
+      gap: 12,
     },
     titleContainer: {
       flexDirection: "row",
-      alignItems: "center",
       flex: 1,
-      gap: 8,
+      gap: 10,
+      alignItems: "flex-start",
+      minWidth: 0,
+    },
+    iconWrap: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 1,
+      flexShrink: 0,
+    },
+    titleTextBlock: {
+      flex: 1,
+      minWidth: 0,
     },
     taskName: {
-      fontSize: 16,
-      fontWeight: "600",
-      flex: 1,
+      fontSize: 15,
+      fontWeight: "700",
+      lineHeight: 20,
+      color: tokens.heading,
     },
-    statusButton: {
-      borderRadius: 20,
-      minWidth: 80,
-    },
-    statusButtonLabel: {
+    taskMeta: {
+      marginTop: 2,
       fontSize: 12,
-      fontWeight: "600",
-      letterSpacing: 0.5,
-      color: "#FFFFFF",
+      lineHeight: 16,
+      color: tokens.heading,
+    },
+    statusChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      alignSelf: "flex-start",
+      borderWidth: 1,
+      borderRadius: 999,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      minHeight: 32,
+      gap: 6,
+    },
+    pressedChip: {
+      opacity: 0.8,
+    },
+    statusChipText: {
+      fontSize: 11,
+      fontWeight: "700",
+      letterSpacing: 0.2,
+      textTransform: "capitalize",
     },
     menuContent: {
-      borderRadius: 8,
+      borderRadius: 10,
     },
     activeMenuItem: {
-      backgroundColor: "#2196F320",
+      backgroundColor: `${tokens.button}18`,
     },
     divider: {
-      marginHorizontal: 12,
+      marginHorizontal: 14,
       height: 1,
+      backgroundColor: tokens.border,
     },
     detailsSection: {
-      padding: 12,
+      paddingHorizontal: 14,
+      paddingTop: 10,
+      paddingBottom: 10,
       gap: 8,
     },
     detailRow: {
       flexDirection: "row",
-      alignItems: "center",
+      alignItems: "flex-start",
       gap: 8,
     },
     detailLabel: {
-      fontSize: 13,
-      color: "#666666",
-      fontWeight: "500",
-      minWidth: 85,
+      fontSize: 12,
+      lineHeight: 18,
+      color: tokens.text,
+      fontWeight: "600",
+      minWidth: 100,
     },
     detailValue: {
-      fontSize: 13,
-      fontWeight: "400",
+      fontSize: 12,
+      lineHeight: 18,
+      fontWeight: "500",
       flex: 1,
+      color: tokens.text,
     },
     priorityChip: {
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 12,
-      backgroundColor: "#FF980020",
+      borderRadius: 999,
+      alignSelf: "flex-start",
     },
     priorityText: {
       fontSize: 11,
-      fontWeight: "600",
+      fontWeight: "700",
     },
     notesContainer: {
       flexDirection: "row",
       marginTop: 4,
-      paddingTop: 4,
       gap: 8,
+      alignItems: "flex-start",
     },
     notesText: {
       fontSize: 12,
+      lineHeight: 18,
       flex: 1,
-      fontStyle: "italic",
+      color: tokens.text,
     },
     timestampsSection: {
-      padding: 12,
-      paddingTop: 8,
+      paddingHorizontal: 14,
+      paddingTop: 10,
+      paddingBottom: 14,
       gap: 4,
+      backgroundColor: `${tokens.surface}80`,
     },
-    timestampRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-    },
-    detailLabel: {
-      fontSize: 11,
-      color: "#666666",
-      minWidth: 85,
-    },
-    timestampValue: {
-      fontSize: 11,
-      color: "#000000",
-      flex: 1,
+    rowIcon: {
+      marginTop: 1,
+      flexShrink: 0,
     },
   });

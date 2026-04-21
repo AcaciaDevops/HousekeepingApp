@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FLOW_METER_SERVICE_API_URL } from '../config/env';
 
-// API configuration
-const DEVICE_API_URL = process.env.EXPO_PUBLIC_APP_API_FLOW_METER_URL || 'https://your-api.com/flow-meters';
-const DATA_API_URL = process.env.EXPO_PUBLIC_APP_API_FLOW_METER_DATA_URL || 'https://your-api.com/flow-meter-data';
-const TARIFF_API_URL = process.env.EXPO_PUBLIC_APP_API_FLOW_METER_TARIFF_URL || 'https://your-api.com/tariffs';
-const LOGS_API_URL = process.env.EXPO_PUBLIC_APP_API_FLOW_METER_LOGS_URL || 'https://your-api.com/logs';
+const DEVICE_API_URL =`${FLOW_METER_SERVICE_API_URL}/flowmeter`;
+const DATA_API_URL =`${FLOW_METER_SERVICE_API_URL}/flowmeterData`;
+const TARIFF_API_URL = `${FLOW_METER_SERVICE_API_URL}/flowmeterTariff`;
+
 
 // Custom fetch implementation for React Native
 const fetchWithTimeout = async (url, options = {}, timeout = 30000) => {
