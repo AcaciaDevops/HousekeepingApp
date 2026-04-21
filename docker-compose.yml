@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  # Development service for Expo web
+  pms-web-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: pms-app-web-dev
+    ports:
+      - "19006:19006"  # Expo web server
+      - "19007:19007"  # WebSocket for dev tools
+      - "5555:5555"    # React Native Debugger
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - EXPO_DEBUG=false
+    stdin_open: true
+    tty: true
+    networks:
+      - pms-network
+
+  # Alternative: Production service (optional)
+  pms-web-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: pms-app-web-prod
+    ports:
+      - "8085:8085"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - pms-network
+    profiles:
+      - prod
+
+networks:
+  pms-network:
+    driver: bridge

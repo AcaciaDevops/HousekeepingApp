@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
         // Fetch user profile (optional, don't fail if this doesn't work)
         try {
           const userResponse = await fetch(
-            "http://192.168.1.111:3001/api/user/me",
+            "http://172.26.64.1:3001/api/user/me",
             {
               method: "GET",
               headers: {
@@ -129,7 +129,7 @@ export function AuthProvider({ children }) {
       // Optional: call backend logout
       if (token) {
         try {
-          await fetch("http://192.168.1.111:3000/api/authentication/logout", {
+          await fetch("http://172.26.64.1:3000/api/authentication/logout", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,

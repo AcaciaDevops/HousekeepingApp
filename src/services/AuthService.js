@@ -16,7 +16,7 @@ async function login(credentials) {
     try {
         console.log("📡 Calling login API for:", credentials.user_email);
         
-        const response = await fetch('http://192.168.1.111:3000/api/authentication/login', {
+        const response = await fetch('http://172.26.64.1:3000/api/authentication/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
