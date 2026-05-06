@@ -51,7 +51,7 @@ docker run -p 8085:8085 pms-app-web-prod
 If you want the container logs to show your manager's URL, run it with `APP_URL`:
 
 ```bash
-docker run -p 8085:8085 -e APP_URL=http://172.26.64.1:8085 pms-app-web-prod
+docker run -p 8085:8085 -e APP_URL=http://192.168.1.135:8085 pms-app-web-prod
 ```
 
 ## Available Ports

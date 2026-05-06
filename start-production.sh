@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-APP_URL="${APP_URL:-http://172.26.64.1:8085}"
+APP_URL="${APP_URL:-http://192.168.1.135:8085}"
 
 echo "Open this app at: ${APP_URL}"
 

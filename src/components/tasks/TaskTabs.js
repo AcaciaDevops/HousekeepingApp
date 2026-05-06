@@ -101,6 +101,7 @@ export default function TaskTabs() {
 const createTaskTabsStyles = (tokens) =>
   StyleSheet.create({
     container: {
+        padding:0,
       flex: 1,
       backgroundColor: tokens.blockSecondary,
     },

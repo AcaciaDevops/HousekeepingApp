@@ -14,7 +14,7 @@ export default function ThemedScreen({ children, style }) {
 
 const styles = StyleSheet.create({
   root: {
-     paddingLeft:40,
+    
     flex: 1,
   },
 });

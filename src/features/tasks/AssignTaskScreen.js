@@ -1,22 +1,26 @@
+// src/features/tasks/AssignTaskScreen.js
 import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  ScrollView,
 } from "react-native";
-import { TextInput, Button, Modal, Portal } from "react-native-paper";
+import { TextInput, Button } from "react-native-paper";
+
 import { fetchAllTasks, assignTasks } from "../../api/TasksApi";
 import { fetchRooms } from "../../api/RoomApi";
 import { fetchUserbyRole } from "../../api/UserApi";
+
 import useAuth from "../auth/hooks/useAuth";
 import { useAppTheme } from "../../context/ThemeContext";
 import { useThemedStyles } from "../../utils/useThemedStyles";
 import { ThemedScreen, ThemedScrollView } from "../../components/ui";
 
+import CustomDropdown from "../../components/CustomDropdown";
+
 export default function AssignTaskScreen({ navigation }) {
   const { user } = useAuth();
+
   const userId = user?.user_id;
   const userEmail = user?.user_email;
   const userRole = user?.user_role_name;
@@ -29,11 +33,13 @@ export default function AssignTaskScreen({ navigation }) {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedStaff, setSelectedStaff] = useState(null);
 
-  const [priority, setPriority] = useState("medium");
+const [priority, setPriority] = useState("medium");
+const [priorityDropdown, setPriorityDropdown] = useState(false);
   const [notes, setNotes] = useState("");
 
   const [loading, setLoading] = useState(false);
 
+  // dropdown states
   const [taskDropdown, setTaskDropdown] = useState(false);
   const [roomDropdown, setRoomDropdown] = useState(false);
   const [staffDropdown, setStaffDropdown] = useState(false);
@@ -46,10 +52,17 @@ export default function AssignTaskScreen({ navigation }) {
   }, []);
 
   async function loadData() {
-     const task_type = userRole === "MaintenanceManager" ? "maintenance": "housekeeping";
+    const task_type =
+      userRole === "MaintenanceManager" ? "maintenance" : "housekeeping";
+
     const t = await fetchAllTasks(task_type);
     const r = await fetchRooms();
-    const roleName = userRole === "MaintenanceManager" ? "MaintenanceStaff" : "HousekeepingStaff";
+
+    const roleName =
+      userRole === "MaintenanceManager"
+        ? "MaintenanceStaff"
+        : "HousekeepingStaff";
+
     const s = await fetchUserbyRole(roleName);
 
     setTasks(t.items || []);
@@ -65,8 +78,8 @@ export default function AssignTaskScreen({ navigation }) {
 
     setLoading(true);
 
-    const taskObj = tasks.find(t => t.id === selectedTask);
-    const staffObj = staff.find(u => u.user_id === selectedStaff);
+    const taskObj = tasks.find((t) => t.id === selectedTask);
+    const staffObj = staff.find((u) => u.user_id === selectedStaff);
 
     const payload = {
       task_id: taskObj.id,
@@ -96,58 +109,59 @@ export default function AssignTaskScreen({ navigation }) {
         <Text style={styles.title}>Assign Task</Text>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Task details</Text>
+          <Text style={styles.sectionTitle}>Task Details</Text>
 
-          <TextInput
+          {/* Task Dropdown */}
+          <CustomDropdown
             label="Select Task"
-            value={selectedTask ? tasks.find((t) => t.id === selectedTask)?.task_name : ""}
-            mode="outlined"
-            onPressIn={() => setTaskDropdown(true)}
-            style={styles.input}
-            textColor={tokens.text}
-            outlineColor={tokens.border}
-            editable={false}
-            showSoftInputOnFocus={false}
+            data={tasks}
+            selectedValue={selectedTask}
+            visible={taskDropdown}
+            setVisible={setTaskDropdown}
+            onSelect={(item) => setSelectedTask(item.id)}
+            renderLabel={(item) => item.task_name}
           />
 
-          <TextInput
+          {/* Room Dropdown */}
+          <CustomDropdown
             label="Select Room"
-            value={selectedRoom ? `Room ${selectedRoom}` : ""}
-            mode="outlined"
-            style={styles.input}
-            onPressIn={() => setRoomDropdown(true)}
-            textColor={tokens.text}
-            outlineColor={tokens.border}
-            editable={false}
-            showSoftInputOnFocus={false}
-          />
-
-          <TextInput
-            label="Assign To Staff"
-            value={
-              selectedStaff
-                ? staff.find((u) => u.user_id === selectedStaff)?.user_first_name
-                : ""
+            data={rooms}
+            selectedValue={selectedRoom}
+            visible={roomDropdown}
+            setVisible={setRoomDropdown}
+            onSelect={(item) => setSelectedRoom(item.room_id)}
+            renderLabel={(item) =>
+              `Room ${item.room_number} (ID: ${item.room_id})`
             }
-            mode="outlined"
-            style={styles.input}
-            onPressIn={() => setStaffDropdown(true)}
-            textColor={tokens.text}
-            outlineColor={tokens.border}
-            editable={false}
-            showSoftInputOnFocus={false}
           />
 
-          <TextInput
+          {/* Staff Dropdown */}
+          <CustomDropdown
+            label="Assign To Staff"
+            data={staff}
+            selectedValue={selectedStaff}
+            visible={staffDropdown}
+            setVisible={setStaffDropdown}
+            onSelect={(item) => setSelectedStaff(item.user_id)}
+            renderLabel={(item) =>
+              `${item.user_first_name} (${item.user_email})`
+            }
+          />
+          <CustomDropdown
             label="Priority"
-            value={priority}
-            onChangeText={setPriority}
-            mode="outlined"
-            style={styles.input}
-            textColor={tokens.text}
-            outlineColor={tokens.border}
+            data={[
+              { id: "high", label: "High" },
+              { id: "medium", label: "Medium" },
+              { id: "low", label: "Low" },
+            ]}
+            selectedValue={priority}
+            visible={priorityDropdown}
+            setVisible={setPriorityDropdown}
+            onSelect={(item) => setPriority(item.id)}
+            renderLabel={(item) => item.label}
           />
 
+          {/* Notes */}
           <TextInput
             label="Notes"
             value={notes}
@@ -160,6 +174,7 @@ export default function AssignTaskScreen({ navigation }) {
             outlineColor={tokens.border}
           />
 
+          {/* Button */}
           <Button
             mode="contained"
             onPress={handleAssign}
@@ -172,127 +187,43 @@ export default function AssignTaskScreen({ navigation }) {
           </Button>
         </View>
       </ThemedScrollView>
-
-      <Portal>
-        <Modal
-          visible={taskDropdown}
-          onDismiss={() => setTaskDropdown(false)}
-          contentContainerStyle={styles.modalBox}
-        >
-          <Text style={styles.modalTitle}>Select Task</Text>
-          {tasks.map(t => (
-            <Button
-              key={t.id}
-              onPress={() => {
-                setSelectedTask(t.id);
-                setTaskDropdown(false);
-              }}
-              textColor={tokens.text}
-            >
-              {t.task_name}
-            </Button>
-          ))}
-        </Modal>
-      </Portal>
-
-      <Portal>
-        <Modal
-          visible={roomDropdown}
-          onDismiss={() => setRoomDropdown(false)}
-          contentContainerStyle={styles.modalBox}
-        >
-          <Text style={styles.modalTitle}>Select Room</Text>
-          <ScrollView style={styles.dropdownScroll}>
-            {rooms.map(r => (
-              <Button
-                key={r.room_id}
-                onPress={() => {
-                  setSelectedRoom(r.room_id);
-                  setRoomDropdown(false);
-                }}
-                textColor={tokens.text}
-              >
-                (Room Number: {r.room_number}) (ID: {r.room_id})
-              </Button>
-            ))}
-          </ScrollView>
-        </Modal>
-      </Portal>
-
-      <Portal>
-        <Modal
-          visible={staffDropdown}
-          onDismiss={() => setStaffDropdown(false)}
-          contentContainerStyle={styles.modalBox}
-        >
-          <Text style={styles.modalTitle}>Assign To Staff</Text>
-          <ScrollView style={styles.dropdownScroll}>
-            {staff.map(u => (
-              <TouchableOpacity
-                key={u.user_id}
-                style={styles.staffItem}
-                onPress={() => {
-                  setSelectedStaff(u.user_id);
-                  setStaffDropdown(false);
-                }}
-              >
-                <Text style={[styles.staffName, { color: tokens.text }]}>
-                  {u.user_first_name}  
-                  <Text style={[styles.staffEmail, { color: tokens.link }]}>   {u.user_email}</Text>
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </Modal>
-      </Portal>
     </ThemedScreen>
   );
 }
 
 const createStyles = (tokens) =>
   StyleSheet.create({
-    main: {
-      padding: 20,
-      backgroundColor: tokens.background,
-    },
-    spacing: {
-      marginTop: 15,
-    },
-    input: {
-      backgroundColor: tokens.surface,
-    },
-    assignButton: {
-      borderRadius: 8,
-    },
-    modalBox: {
-      backgroundColor: tokens.surface,
+    page: {
       padding: 15,
-      margin: 20,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: "700",
+      marginBottom: 16,
+      color: tokens.heading,
+    },
+    card: {
+      backgroundColor: tokens.surface,
+      padding: 16,
       borderRadius: 12,
       borderWidth: 1,
       borderColor: tokens.border,
     },
-    modalTitle: {
-      fontSize: 18,
-      fontWeight: "700",
-      marginBottom: 10,
-      color: tokens.heading,
-    },
-    dropdownScroll: {
-      maxHeight: 320,
-    },
-    staffItem: {
-      padding: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: tokens.border,
-    },
-    staffName: {
+    sectionTitle: {
+      fontSize: 16,
       fontWeight: "600",
-      fontSize: 15,
+      marginBottom: 12,
+      color: tokens.text,
     },
-    staffEmail: {
-      color: tokens.link,
-      fontSize: 13,
-      fontWeight: "400",
+    input: {
+      marginBottom: 12,
+      backgroundColor: tokens.surface,
+    },
+    multilineInput: {
+      height: 90,
+    },
+    assignButton: {
+      marginTop: 10,
+      borderRadius: 8,
     },
   });

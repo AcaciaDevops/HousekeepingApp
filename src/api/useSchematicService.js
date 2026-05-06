@@ -2,12 +2,7 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import { GRAPHICS_SERVICE_API_URL } from '../config/env';
 
-// ✅ Define the specific API URL from environment variables
-// For React Native (Expo), you'll need to use @env or react-native-config
-// Option 1: Using react-native-dotenv (already in your package.json)
-
-// Option 2: Using a config file approach (fallback)
-const API_URL = process.env.EXPO_PUBLIC_APP_API_GRAPHICS_SERVICE_URL || '';
+const API_URL =`${GRAPHICS_SERVICE_API_URL}/graphics`;
 
 const normalizeGraphicsData = (flowData) => {
   if (!flowData) return flowData;

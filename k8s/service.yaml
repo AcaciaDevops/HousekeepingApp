@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: acacia-maintenance-app-service
+spec:
+  selector:
+    app: acacia-maintenance-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

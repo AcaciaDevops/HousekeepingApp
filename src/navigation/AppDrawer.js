@@ -42,12 +42,16 @@ export default function AppDrawer({ user }) {
                             left: 0,
                             top: 0,
                             bottom: 0,
-                            zIndex: 20,
+                            zIndex: 100,
                             backgroundColor: tokens.drawer,
                             width: isExpanded ? EXPANDED_DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
                             borderRightWidth: 0,
-                            elevation: 0,
+                            elevation: 20,
+                            overflow: "hidden",
                             shadowOpacity: 0,
+                        },
+                        sceneContainerStyle: {
+                            marginLeft: isExpanded ? 40 : 40, // 👈 ONLY HERE
                         },
                         headerShown: false,
                         headerStyle: {

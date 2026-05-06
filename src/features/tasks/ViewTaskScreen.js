@@ -179,7 +179,7 @@ export default function ViewTasksScreen() {
         data={tasks}
         renderItem={renderTask}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ padding: 15 }}
+        contentContainerStyle={{ padding:15 }}
       />
     </View>
   );

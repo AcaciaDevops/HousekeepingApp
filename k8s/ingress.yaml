@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: acacia-maintenance-app-ingress
+spec:
+  rules:
+    - host: acacia-maintenance-app.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: acacia-maintenance-app-service
+                port:
+                  number: 80
