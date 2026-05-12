@@ -1,27 +1,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: acacia-maintenance-app
+  name: acacia360-maintenance-app
+  labels:
+    app: acacia360-maintenance-app
+
 spec:
-  replicas: 2
+  replicas: 1
+
   selector:
     matchLabels:
-      app: acacia-maintenance-app
+      app: acacia360-maintenance-app
+
   template:
     metadata:
       labels:
-        app: acacia-maintenance-app
+        app: acacia360-maintenance-app
+
     spec:
       containers:
-        - name: acacia-maintenance-app
-          image: acacia-maintenance-app:v1
-          imagePullPolicy: Never    # ← Use local image, don't pull from registry
+        - name: acacia360-maintenance-app
+
+          image: acaciagreentechnologies/acacia360-maintenance:latest
+          imagePullPolicy: Always
+
           ports:
-            - containerPort: 80
+            - containerPort: 8085
+
           resources:
             requests:
-              memory: "64Mi"
-              cpu: "100m"
-            limits:
               memory: "128Mi"
-              cpu: "200m"
+              cpu: "100m"
+
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+
+          volumeMounts:
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: nginx.conf
+              readOnly: true
+
+      volumes:
+        - name: nginx-config-volume
+          configMap:
+            name: acacia360-maintenance-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
