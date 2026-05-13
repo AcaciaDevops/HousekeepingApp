@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acacia360-maintenance-frontend
+  namespace: acacia360
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: acacia360-maintenance-frontend
+
+  template:
+    metadata:
+      labels:
+        app: acacia360-maintenance-frontend
+
+    spec:
+      containers:
+        - name: acacia360-maintenance-frontend
+          image: acaciagreentechnologies/acacia360-maintenance-app:latest
+
+          ports:
+            - containerPort: 8085
+              hostPort: 8085   # ⭐ IMPORTANT (binds to Windows IP)
+
+          imagePullPolicy: Always
