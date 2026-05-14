@@ -21,3 +21,16 @@ export async function fetchUserbyRole(role_name) {
     throw error;
   }
 }
+
+export async function fetchStaffStatus() {
+    
+  try {
+     let url = `${USER_SERVICE_API_URL}/staff/all`;
+      const response = await axios.get(url);
+    console.log("staffStatus::12", response.data);
+    return response.data.data; // assuming backend returns array of users
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+}

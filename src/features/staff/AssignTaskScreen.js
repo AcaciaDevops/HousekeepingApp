@@ -1,120 +1,170 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+// src/features/staff/AssignTaskScreen.js
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+} from "react-native";
 import { TextInput, Button } from "react-native-paper";
+
+import { fetchAllTasks, assignTasks } from "../../api/TasksApi";
+import { fetchRooms } from "../../api/RoomApi";
+import { fetchUserbyRole } from "../../api/UserApi";
+
+import useAuth from "../auth/hooks/useAuth";
 import { useAppTheme } from "../../context/ThemeContext";
 import { useThemedStyles } from "../../utils/useThemedStyles";
 import { ThemedScreen, ThemedScrollView } from "../../components/ui";
 
-export default function AssignTaskScreen({ route, navigation }) {
-  const staff = route?.params?.staff;
+import CustomDropdown from "../../components/CustomDropdown";
+
+export default function AssignTaskScreen({ navigation, route }) {
+  const preselectedStaff = route?.params?.staff ?? null;
+  const { user } = useAuth();
+
+  const userId = user?.user_id;
+  const userEmail = user?.user_email;
+  const userRole = user?.user_role_name;
+
+  const [tasks, setTasks] = useState([]);
+  const [rooms, setRooms] = useState([]);
+
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+
+  const [priority, setPriority] = useState("medium");
+  const [priorityDropdown, setPriorityDropdown] = useState(false);
+  const [notes, setNotes] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  // dropdown states
+  const [taskDropdown, setTaskDropdown] = useState(false);
+  const [roomDropdown, setRoomDropdown] = useState(false);
+
   const { tokens } = useAppTheme();
   const styles = useThemedStyles(createStyles);
 
-  const [taskType, setTaskType] = useState("");
-  const [rooms, setRooms] = useState("");
-  const [priority, setPriority] = useState("Medium");
-  const [notes, setNotes] = useState("");
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const handleAssign = () => {
-    if (!taskType || !rooms) {
-      Alert.alert("Missing fields", "Task type and rooms are required");
+  async function loadData() {
+    const task_type = userRole === "MaintenanceManager" ? "maintenance" : "housekeeping";
+    const t = await fetchAllTasks(task_type);
+    const r = await fetchRooms();
+    setTasks(t.items || []);
+    setRooms(r || []);
+  }
+
+  async function handleAssign() {
+    if (!selectedTask || !selectedRoom ) {
+      alert("Please select task, room and staff.");
       return;
     }
 
-    console.log({
-      staffId: staff.id,
-      staffName: staff.name,
-      taskType,
-      rooms,
+    setLoading(true);
+
+    const taskObj = tasks.find((t) => t.id === selectedTask);
+
+    const payload = {
+      task_id: taskObj.id,
+      room_id: selectedRoom,
+      assigned_to: preselectedStaff.user_id,
+      assigned_by: userId,
+      assigned_to_email: preselectedStaff.user_email,
+      assigned_by_email: userEmail,
+      task_type: taskObj.task_type,
+      task_name: taskObj.task_name,
       priority,
       notes,
-    });
+    };
 
-    Alert.alert("Success", "Task assigned successfully");
-    navigation.goBack();
-  };
+    const res = await assignTasks(payload);
+    setLoading(false);
 
-  if (!staff) {
-    return (
-      <ThemedScreen>
-        <View style={styles.page}>
-          <Text style={styles.emptyText}>No staff data available.</Text>
-        </View>
-      </ThemedScreen>
-    );
+    if (res) {
+      alert("Task Assigned Successfully!");
+      navigation.goBack();
+    }
   }
 
   return (
     <ThemedScreen>
       <ThemedScrollView contentContainerStyle={styles.page}>
         <View style={styles.card}>
-          <Text style={styles.title}>Assign Task</Text>
+          <Text style={styles.sectionTitle}>Task Details</Text>
 
-          <Text style={styles.label}>Staff</Text>
-          <Text style={styles.staffName}>{staff.name}</Text>
+          {/* Staff Info — static, no dropdown */}
+          <View style={styles.staffInfoBox}>
+            <Text style={styles.staffInfoLabel}>Assigning To</Text>
+            <Text style={styles.staffInfoValue}>
+              {preselectedStaff?.user_first_name} ({preselectedStaff?.user_email})
+            </Text>
+          </View>
 
-          <TextInput
-            label="Task Type"
-            value={taskType}
-            onChangeText={setTaskType}
-            mode="outlined"
-            style={styles.input}
-            textColor={tokens.text}
-            outlineColor={tokens.border}
+          {/* Task Dropdown */}
+          <CustomDropdown
+            label="Select Task"
+            data={tasks}
+            selectedValue={selectedTask}
+            visible={taskDropdown}
+            setVisible={setTaskDropdown}
+            onSelect={(item) => setSelectedTask(item.id)}
+            renderLabel={(item) => item.task_name}
           />
 
-          <TextInput
-            label="Rooms"
-            value={rooms}
-            onChangeText={setRooms}
-            mode="outlined"
-            style={styles.input}
-            textColor={tokens.text}
-            outlineColor={tokens.border}
+          {/* Room Dropdown */}
+          <CustomDropdown
+            label="Select Room"
+            data={rooms}
+            selectedValue={selectedRoom}
+            visible={roomDropdown}
+            setVisible={setRoomDropdown}
+            onSelect={(item) => setSelectedRoom(item.room_id)}
+            renderLabel={(item) =>
+              `Room ${item.room_number} (ID: ${item.room_id})`
+            }
           />
 
-          <TextInput
+          <CustomDropdown
             label="Priority"
-            value={priority}
-            onChangeText={setPriority}
-            mode="outlined"
-            style={styles.input}
-            textColor={tokens.text}
-            outlineColor={tokens.border}
+            data={[
+              { id: "high", label: "High" },
+              { id: "medium", label: "Medium" },
+              { id: "low", label: "Low" },
+            ]}
+            selectedValue={priority}
+            visible={priorityDropdown}
+            setVisible={setPriorityDropdown}
+            onSelect={(item) => setPriority(item.id)}
+            renderLabel={(item) => item.label}
           />
 
+          {/* Notes */}
           <TextInput
             label="Notes"
             value={notes}
-            onChangeText={setNotes}
-            mode="outlined"
             multiline
-            numberOfLines={4}
+            mode="outlined"
+            numberOfLines={3}
+            onChangeText={setNotes}
             style={[styles.input, styles.multilineInput]}
             textColor={tokens.text}
             outlineColor={tokens.border}
           />
 
-          <View style={styles.buttonRow}>
-            <Button
-              mode="outlined"
-              onPress={() => navigation.goBack()}
-              style={styles.cancelButton}
-              buttonColor={tokens.surface}
-              textColor={tokens.text}
-            >
-              Cancel
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleAssign}
-              style={styles.assignButton}
-              buttonColor={tokens.button}
-              textColor={tokens.buttonText}
-            >
-              Assign
-            </Button>
-          </View>
+          {/* Button */}
+          <Button
+            mode="contained"
+            onPress={handleAssign}
+            loading={loading}
+            style={styles.assignButton}
+            buttonColor={tokens.button}
+            textColor={tokens.buttonText}
+          >
+            Assign Task
+          </Button>
         </View>
       </ThemedScrollView>
     </ThemedScreen>
@@ -124,61 +174,54 @@ export default function AssignTaskScreen({ route, navigation }) {
 const createStyles = (tokens) =>
   StyleSheet.create({
     page: {
-      flex: 1,
-      backgroundColor: tokens.background,
-      padding: 16,
+      padding: 15,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: "700",
+      marginBottom: 16,
+      color: tokens.heading,
     },
     card: {
       backgroundColor: tokens.surface,
-      borderRadius: 16,
+      padding: 16,
+      borderRadius: 12,
       borderWidth: 1,
       borderColor: tokens.border,
-      padding: 18,
     },
-    title: {
-      fontSize: 24,
-      fontWeight: "700",
-      color: tokens.heading,
-      marginBottom: 16,
-    },
-    label: {
-      color: tokens.text,
-      fontSize: 14,
-      marginBottom: 6,
-      fontWeight: "600",
-    },
-    staffName: {
-      color: tokens.text,
+    sectionTitle: {
       fontSize: 16,
       fontWeight: "600",
-      marginBottom: 16,
+      marginBottom: 12,
+      color: tokens.text,
+    },
+      staffInfoBox: {
+      backgroundColor: tokens.background,
+      borderWidth: 1,
+      borderColor: tokens.border,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 12,
+    },
+    staffInfoLabel: {
+      fontSize: 12,
+      color: tokens.text,
+      marginBottom: 4,
+    },
+    staffInfoValue: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: tokens.text,
     },
     input: {
-      backgroundColor: tokens.blockSecondary,
-      marginBottom: 16,
+      marginBottom: 12,
+      backgroundColor: tokens.surface,
     },
     multilineInput: {
-      minHeight: 100,
-    },
-    buttonRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginTop: 10,
-    },
-    cancelButton: {
-      flex: 1,
-      borderRadius: 10,
-      borderColor: tokens.border,
-      borderWidth: 1,
-      marginRight: 8,
+      height: 90,
     },
     assignButton: {
-      flex: 1,
-      borderRadius: 10,
-    },
-    emptyText: {
-      color: tokens.text,
-      padding: 16,
-      fontSize: 16,
+      marginTop: 10,
+      borderRadius: 8,
     },
   });

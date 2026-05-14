@@ -1,8 +1,98 @@
+// src/features/staff/StaffDetailsScreen.js
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { ThemedScreen } from "../../components/ui";
 import { useAppTheme } from "../../context/ThemeContext";
 import { useThemedStyles } from "../../utils/useThemedStyles";
+
+// ─────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────
+
+/**
+ * All task statuses to display in the Task Summary section.
+ * Add or remove entries here without touching any other code.
+ */
+const TASK_BADGES = [
+  { key: "completed",   label: "Completed",   icon: "✔",  colorKey: "success" },
+  { key: "in_progress", label: "In Progress", icon: "🔄", colorKey: "info"    },
+  { key: "pending",     label: "Pending",     icon: "⏳", colorKey: "warning" },
+  { key: "approved",    label: "Approved",    icon: "✅", colorKey: "success" },
+  { key: "reassigned",  label: "Reassigned",  icon: "↩️", colorKey: "warning" },
+  { key: "rejected",    label: "Rejected",    icon: "✖",  colorKey: "error"   },
+];
+
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
+
+function formatRooms(rooms) {
+  return Array.isArray(rooms) && rooms.length > 0
+    ? rooms.join(", ")
+    : "None assigned";
+}
+
+// ─────────────────────────────────────────────
+// Sub-components
+// ─────────────────────────────────────────────
+
+function Section({ title, children, styles }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+function InfoRow({ label, value, styles }) {
+  return (
+    <View style={styles.infoRow}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{value}</Text>
+    </View>
+  );
+}
+
+function StatusRow({ label, value, color, styles }) {
+  return (
+    <View style={styles.infoRow}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.value, styles.statusText, { color }]}>{value}</Text>
+    </View>
+  );
+}
+
+function TaskBadge({ icon, label, count, color, styles }) {
+  return (
+    <View style={styles.badgeCard}>
+      <Text style={[styles.badgeIcon, { color }]}>{icon}</Text>
+      <Text style={[styles.badgeCount, { color }]}>{count ?? 0}</Text>
+      <Text style={styles.badgeLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function TaskSummaryGrid({ staffInfo, tokens, styles }) {
+  return (
+    <View style={styles.badgeGrid}>
+      {TASK_BADGES.map(({ key, label, icon, colorKey }) => (
+        <TaskBadge
+          key={key}
+          icon={icon}
+          label={label}
+          count={staffInfo[key]}
+          color={tokens[colorKey] ?? tokens.text}
+          styles={styles}
+        />
+      ))}
+    </View>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Main screen
+// ─────────────────────────────────────────────
 
 export default function StaffDetailsScreen({ route }) {
   const staffInfo = route?.params?.staffInfo;
@@ -12,72 +102,92 @@ export default function StaffDetailsScreen({ route }) {
   if (!staffInfo) {
     return (
       <ThemedScreen>
-        <Text style={{ color: tokens.text, padding: 16 }}>No staff data available.</Text>
+        <Text style={{ color: tokens.text, padding: 16 }}>
+          No staff data available.
+        </Text>
       </ThemedScreen>
     );
   }
 
+  const statusColor =
+    staffInfo.status === "Active" ? tokens.success : tokens.warning;
+
   return (
     <ThemedScreen>
-      <View style={styles.container}>
-        <Text style={styles.title}>Staff Details</Text>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Information</Text>
-          <Text style={styles.item}>Name: {staffInfo?.name}</Text>
-          <Text style={styles.item}>Role: {staffInfo.role}</Text>
-          <Text style={styles.item}>
-            Status: <Text style={[styles.statusText, { color: staffInfo.status === "Active" ? tokens.success : tokens.warning }]}>
-              {staffInfo.status}
-            </Text>
-          </Text>
-        </View>
+        {/* Basic Information */}
+        <Section title="Basic Information" styles={styles}>
+          <InfoRow label="Name"   value={staffInfo.name}   styles={styles} />
+          <InfoRow label="Role"   value={staffInfo.role}   styles={styles} />
+          <StatusRow
+            label="Status"
+            value={staffInfo.status}
+            color={statusColor}
+            styles={styles}
+          />
+        </Section>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Work Details</Text>
-          <Text style={styles.item}>Shift: {staffInfo.shift}</Text>
-          <Text style={styles.item}>Floor: {staffInfo.floor}</Text>
-          <Text style={styles.item}>Rooms: {staffInfo.rooms}</Text>
-        </View>
+        {/* Work Details */}
+        <Section title="Work Details" styles={styles}>
+          <InfoRow
+            label="Assigned Rooms"
+            value={formatRooms(staffInfo.rooms)}
+            styles={styles}
+          />
+        </Section>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Task Summary</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-            <Text style={[styles.statusText, { color: tokens.success, marginRight: 8 }]}>✔</Text>
-            <Text style={styles.item}>Completed: {staffInfo.completed}</Text>
+        {/* Task Summary */}
+        <Section title="Task Summary" styles={styles}>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Total Tasks</Text>
+            <Text style={styles.totalCount}>{staffInfo.totalTasks ?? 0}</Text>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={[styles.statusText, { color: tokens.warning, marginRight: 8 }]}>⏳</Text>
-            <Text style={styles.item}>Pending: {staffInfo.pending}</Text>
-          </View>
-        </View>
+          <TaskSummaryGrid staffInfo={staffInfo} tokens={tokens} styles={styles} />
+        </Section>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>More</Text>
+        {/* Upcoming section */}
+        <Section title="More" styles={styles}>
           <Text style={styles.placeholder}>
             Task history, performance & attendance coming soon.
           </Text>
-        </View>
-      </View>
+        </Section>
+      </ScrollView>
     </ThemedScreen>
   );
 }
 
+// ─────────────────────────────────────────────
+// Styles
+// ─────────────────────────────────────────────
+
 const createStyles = (tokens) =>
   StyleSheet.create({
+    // Layout
     container: {
       flex: 1,
       backgroundColor: tokens.background,
-      padding: 16,
     },
+    contentContainer: {
+      padding: 16,
+      paddingBottom: 32,
+    },
+
+    // Title
     title: {
       fontSize: tokens.fonts.titleLarge.fontSize,
       fontWeight: tokens.fonts.titleLarge.fontWeight,
       fontFamily: tokens.fonts.titleLarge.fontFamily,
-      marginBottom: 20,
       color: tokens.heading,
-      textAlign: 'center',
+      textAlign: "center",
+      marginBottom: 20,
     },
+
+    // Section card
     section: {
       backgroundColor: tokens.surface,
       borderRadius: 12,
@@ -95,30 +205,99 @@ const createStyles = (tokens) =>
       fontSize: tokens.fonts.titleMedium.fontSize,
       fontWeight: tokens.fonts.titleMedium.fontWeight,
       fontFamily: tokens.fonts.titleMedium.fontFamily,
-      marginBottom: 12,
       color: tokens.text,
+      paddingBottom: 8,
+      marginBottom: 12,
       borderBottomWidth: 1,
       borderBottomColor: tokens.border,
-      paddingBottom: 8,
     },
-    item: {
+
+    // Info rows
+    infoRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: 8,
+    },
+    label: {
       fontSize: tokens.fonts.bodyMedium.fontSize,
       fontFamily: tokens.fonts.bodyMedium.fontFamily,
-      marginBottom: 8,
+      color: tokens.textSecondary,
+      flex: 1,
+    },
+    value: {
+      fontSize: tokens.fonts.bodyMedium.fontSize,
+      fontFamily: tokens.fonts.bodyMedium.fontFamily,
       color: tokens.text,
-      lineHeight: 20,
+      flex: 2,
+      textAlign: "right",
     },
     statusText: {
+      fontWeight: "600",
+      textTransform: "uppercase",
+    },
+
+    // Total row
+    totalRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16,
+      paddingBottom: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: tokens.border,
+    },
+    totalLabel: {
       fontSize: tokens.fonts.bodyMedium.fontSize,
       fontFamily: tokens.fonts.bodyMedium.fontFamily,
-      fontWeight: '600',
+      color: tokens.textSecondary,
+      fontWeight: "500",
     },
+    totalCount: {
+      fontSize: tokens.fonts.titleMedium.fontSize,
+      fontWeight: tokens.fonts.titleMedium.fontWeight,
+      fontFamily: tokens.fonts.titleMedium.fontFamily,
+      color: tokens.text,
+    },
+
+    // Badge grid — 3 columns
+    badgeGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+    },
+    badgeCard: {
+      width: "30%",
+      backgroundColor: tokens.background,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: tokens.border,
+      padding: 10,
+      alignItems: "center",
+      gap: 4,
+    },
+    badgeIcon: {
+      fontSize: 20,
+    },
+    badgeCount: {
+      fontSize: tokens.fonts.titleMedium.fontSize,
+      fontWeight: tokens.fonts.titleMedium.fontWeight,
+      fontFamily: tokens.fonts.titleMedium.fontFamily,
+    },
+    badgeLabel: {
+      fontSize: tokens.fonts.bodySmall.fontSize,
+      fontFamily: tokens.fonts.bodySmall.fontFamily,
+      color: tokens.textSecondary,
+      textAlign: "center",
+    },
+
+    // Placeholder
     placeholder: {
       fontSize: tokens.fonts.bodyMedium.fontSize,
       fontFamily: tokens.fonts.bodyMedium.fontFamily,
       color: tokens.textSecondary,
       fontStyle: "italic",
-      textAlign: 'center',
+      textAlign: "center",
       marginTop: 8,
     },
   });

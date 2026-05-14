@@ -16,6 +16,7 @@ export default function NotificationBell() {
   const loadNotifications = async () => {
     try {
       const res = await fetchUnReadNotifications(userId);
+      console.log("res::notification", res)
       setNotifs(res);
     } catch (err) {
       console.error("Failed to load notifications", err);
@@ -60,10 +61,10 @@ export default function NotificationBell() {
                   onPress={() => markAsRead(n.id)}
                   style={styles.notifItem}
                 >
-                  <Text style={styles.notifTitle}>{n.title}</Text>
-                  <Text style={styles.notifMessage}>{n.message}</Text>
+                  <Text style={styles.notifTitle}>{n.notifications_category}</Text>
+                  <Text style={styles.notifMessage}>{n.notifications_text}</Text>
                   <Text style={styles.notifTime}>
-                    {new Date(n.created_at).toLocaleString()}
+                    {new Date(n.notifications_time).toLocaleString()}
                   </Text>
                 </TouchableOpacity>
               ))

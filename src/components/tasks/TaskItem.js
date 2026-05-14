@@ -110,7 +110,7 @@ export default function TaskCard({ task, onStatusUpdated }) {
 
     setUpdatingStatus(true);
     try {
-      await updateTaskStatus(task.id, newStatus, task.task_type);
+      await updateTaskStatus(task.id, newStatus, task.task_type, task.task_name);
       setStatus(newStatus);
       onStatusUpdated?.(newStatus);
       Alert.alert("Success", `Task status updated to "${formatStatus(newStatus)}"`);
