@@ -19,7 +19,7 @@ const EXPANDED_DRAWER_WIDTH = 180;
 
 export default function AppDrawer({ user }) {
     const { tokens } = useAppTheme();
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     return (
         <View style={styles.container}>
