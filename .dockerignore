@@ -2,4 +2,3 @@ node_modules
 .expo
 .git
 *.md
-.env
